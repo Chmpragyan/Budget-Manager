@@ -1,6 +1,7 @@
 package com.example.budgetwise
 
 import android.os.Bundle
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.navigation.NavController
@@ -40,6 +41,15 @@ class MainActivity : AppCompatActivity() {
         )
         findViewById<Toolbar>(R.id.tb_toolbar)
             .setupWithNavController(navController, appBarConfiguration)
+
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            if (destination.id == R.id.home_fragment || destination.id == R.id.stats_fragment || destination.id == R.id.account_fragment || destination.id == R.id.more_fragment) {
+                binding.tbToolbar.visibility = View.VISIBLE
+                binding.bnNavigation.visibility = View.VISIBLE
+            } else {
+                binding.bnNavigation.visibility = View.GONE
+            }
+        }
 
         setupWithNavController(binding.bnNavigation, navController)
     }

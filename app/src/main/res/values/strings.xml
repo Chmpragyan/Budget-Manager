@@ -6,4 +6,8 @@
     <string name="stats">Stats</string>
     <string name="account">Account</string>
     <string name="more">More</string>
+    <string name="add_float_btn">Add</string>
+    <string name="add_income">Income</string>
+    <string name="add_expense">Expense</string>
+    <string name="add_transfer">Transfer</string>
 </resources>

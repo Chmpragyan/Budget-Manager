@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".presentation.view.AddBudget">
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:navigationIcon="@drawable/baseline_arrow_back_24"
+        app:navigationIconTint="@color/black"
+        app:title="Income" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/add_income_btn"
+        android:layout_width="0dp"
+        android:layout_height="32dp"
+        android:background="@drawable/custom_button_selector"
+        android:text="@string/add_income"
+        android:textColor="@color/white"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/add_expense_btn"
+        app:layout_constraintTop_toBottomOf="@id/toolbar"
+        app:layout_constraintWidth_percent="0.3" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/add_expense_btn"
+        android:layout_width="0dp"
+        android:layout_height="32dp"
+        android:background="@drawable/custom_button_selector"
+        android:text="@string/add_expense"
+        android:textColor="@color/white"
+        app:layout_constraintStart_toEndOf="@id/add_income_btn"
+        app:layout_constraintEnd_toStartOf="@id/add_transfer_btn"
+        app:layout_constraintTop_toTopOf="@id/add_income_btn"
+        app:layout_constraintWidth_percent="0.3" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/add_transfer_btn"
+        android:layout_width="0dp"
+        android:layout_height="32dp"
+        android:background="@drawable/custom_button_selector"
+        android:text="@string/add_transfer"
+        android:textColor="@color/white"
+        app:layout_constraintStart_toEndOf="@id/add_expense_btn"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/add_income_btn"
+        app:layout_constraintWidth_percent="0.3" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
