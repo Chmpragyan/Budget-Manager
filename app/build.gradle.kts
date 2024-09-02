@@ -1,6 +1,10 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+
+    id("androidx.navigation.safeargs")
+
+    id("kotlin-kapt")
 }
 
 android {
@@ -33,6 +37,14 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
+
+    buildFeatures {
+        viewBinding = true
+    }
+
+    kapt {
+        correctErrorTypes = true
+    }
 }
 
 dependencies {
@@ -45,4 +57,29 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+
+    // Navigation
+    implementation(libs.androidx.navigation.fragment)
+    implementation(libs.androidx.navigation.ui)
+
+    // LifeCycle Component
+    implementation(libs.lifecycle.viewmodel.ktx)
+    implementation(libs.androidx.lifecycle.livedata.ktx)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+
+    // Glide
+    implementation (libs.glide)
+
+    // Room
+    implementation(libs.androidx.room.room.runtime)
+    kapt(libs.androidx.room.compiler)
+    implementation(libs.androidx.room.room.ktx3)
+
+    // Retrofit
+    implementation(libs.retrofit)
+    implementation (libs.converter.gson)
+
+    // Dagger Hilt
+    implementation (libs.hilt.android)
+    kapt (libs.hilt.compiler)
 }
