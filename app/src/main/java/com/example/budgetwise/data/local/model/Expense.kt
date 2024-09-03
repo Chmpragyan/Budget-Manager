@@ -12,7 +12,7 @@ data class Expense(
     @ColumnInfo(name = "category") val category: ExpenseCategory,
     @ColumnInfo(name = "account") override val account: AccountType,
     @ColumnInfo(name = "note") override val note: String
-) : BaseTransaction(id, date, amount, account, note)
+) : BaseModel(id, date, amount, account, note)
 
 data class ExpenseCategory(
     val id: Int,

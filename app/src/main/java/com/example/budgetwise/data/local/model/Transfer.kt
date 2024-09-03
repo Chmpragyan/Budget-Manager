@@ -12,4 +12,4 @@ data class Transfer(
     @ColumnInfo(name = "sentFrom") val sentFrom: AccountType,
     @ColumnInfo(name = "sentTo") val sentTo: AccountType,
     @ColumnInfo(name = "note") override val note: String
-) : BaseTransaction(id, date, amount, sentFrom, note)
+) : BaseModel(id, date, amount, sentFrom, note)
