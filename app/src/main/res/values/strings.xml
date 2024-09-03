@@ -10,4 +10,35 @@
     <string name="add_income">Income</string>
     <string name="add_expense">Expense</string>
     <string name="add_transfer">Transfer</string>
+    <string name="amount_textview">Amount</string>
+    <string name="date_textview">Date</string>
+    <string name="note_textview">Note</string>
+    <string name="save_btn">Save</string>
+    <string name="category">Category</string>
+    <string name="choose_expense_category">Category</string>
+    <string name="choose_account_category">Category</string>
+    <string name="send_from_transfer">From</string>
+    <string name="send_to_transfer">To</string>
+
+    <string-array name="income_category">
+        <item>Salary</item>
+        <item>Bonus</item>
+        <item>Other</item>
+    </string-array>
+
+    <string-array name="expense_category">
+        <item>Food</item>
+        <item>Clothing</item>
+        <item>Education</item>
+        <item>Health</item>
+        <item>Entertainment</item>
+        <item>Travel</item>
+    </string-array>
+
+    <string-array name="account_category">
+        <item>Cash</item>
+        <item>Accounts</item>
+        <item>Card</item>
+    </string-array>
+
 </resources>

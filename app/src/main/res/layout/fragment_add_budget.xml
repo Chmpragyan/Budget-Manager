@@ -21,11 +21,12 @@
         android:id="@+id/add_income_btn"
         android:layout_width="0dp"
         android:layout_height="32dp"
+        android:layout_marginTop="8dp"
         android:background="@drawable/custom_button_selector"
         android:text="@string/add_income"
         android:textColor="@color/white"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@id/add_expense_btn"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/toolbar"
         app:layout_constraintWidth_percent="0.3" />
 
@@ -36,8 +37,8 @@
         android:background="@drawable/custom_button_selector"
         android:text="@string/add_expense"
         android:textColor="@color/white"
-        app:layout_constraintStart_toEndOf="@id/add_income_btn"
         app:layout_constraintEnd_toStartOf="@id/add_transfer_btn"
+        app:layout_constraintStart_toEndOf="@id/add_income_btn"
         app:layout_constraintTop_toTopOf="@id/add_income_btn"
         app:layout_constraintWidth_percent="0.3" />
 
@@ -48,9 +49,67 @@
         android:background="@drawable/custom_button_selector"
         android:text="@string/add_transfer"
         android:textColor="@color/white"
-        app:layout_constraintStart_toEndOf="@id/add_expense_btn"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/add_expense_btn"
         app:layout_constraintTop_toTopOf="@id/add_income_btn"
         app:layout_constraintWidth_percent="0.3" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/gl_guideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.15" />
+
+    <FrameLayout
+        android:id="@+id/fl_income_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="visible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/gl_guideline">
+
+        <include
+            android:id="@+id/income_layout"
+            layout="@layout/add_income_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/fl_expense_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/gl_guideline">
+
+        <include
+            android:id="@+id/expense_layout"
+            layout="@layout/add_expense_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/fl_transfer_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/gl_guideline">
+
+        <include
+            android:id="@+id/transfer_layout"
+            layout="@layout/add_transfer_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </FrameLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
