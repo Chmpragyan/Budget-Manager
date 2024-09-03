@@ -6,15 +6,15 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "expense_table")
 data class Expense(
-    @PrimaryKey(autoGenerate = true) val id: Int? = null,
-    @ColumnInfo(name = "date") val date: Long,
-    @ColumnInfo(name = "amount") val amount: Double,
-    @ColumnInfo(name = "category") val category: IncomeCategory,
-    @ColumnInfo(name = "account") val account: AccountType,
-    @ColumnInfo(name = "note") val note: String
-)
+    @PrimaryKey(autoGenerate = true) override val id: Int? = null,
+    @ColumnInfo(name = "date") override val date: Long,
+    @ColumnInfo(name = "amount") override val amount: Double,
+    @ColumnInfo(name = "category") val category: ExpenseCategory,
+    @ColumnInfo(name = "account") override val account: AccountType,
+    @ColumnInfo(name = "note") override val note: String
+) : BaseTransaction(id, date, amount, account, note)
 
-data class IncomeCategory(
+data class ExpenseCategory(
     val id: Int,
     val name: String
 )
