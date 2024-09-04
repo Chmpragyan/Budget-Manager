@@ -8,5 +8,5 @@ import com.example.budgetwise.data.local.model.Income
 interface IncomeDao {
 
     @Insert
-    fun insertIncome(income: Income)
+    suspend fun insertIncome(income: Income)
 }

@@ -4,7 +4,9 @@ plugins {
 
     id("androidx.navigation.safeargs")
 
+    id("kotlin-android")
     id("kotlin-kapt")
+    id("com.google.dagger.hilt.android")
 }
 
 android {
@@ -82,4 +84,7 @@ dependencies {
     // Dagger Hilt
     implementation (libs.hilt.android)
     kapt (libs.hilt.compiler)
+
+    // Gson
+    implementation (libs.gson)
 }

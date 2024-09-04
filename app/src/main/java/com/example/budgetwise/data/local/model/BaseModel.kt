@@ -4,6 +4,6 @@ open class BaseModel(
     open val id: Int? = null,
     open val date: Long,
     open val amount: Double,
-    open val account: AccountType,
+    open var accountId: Int,
     open val note: String
 )

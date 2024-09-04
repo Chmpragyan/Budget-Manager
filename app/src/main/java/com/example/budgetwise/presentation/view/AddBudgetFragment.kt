@@ -1,22 +1,33 @@
 package com.example.budgetwise.presentation.view
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.FrameLayout
+import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.appcompat.widget.AppCompatButton
+import androidx.fragment.app.activityViewModels
 import com.example.budgetwise.R
+import com.example.budgetwise.data.local.model.AccountType
+import com.example.budgetwise.data.local.model.IncomeCategory
 import com.example.budgetwise.databinding.FragmentAddBudgetBinding
+import com.example.budgetwise.presentation.viewmodel.IncomeViewModel
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import dagger.hilt.android.AndroidEntryPoint
 
-class AddBudget : BottomSheetDialogFragment(), View.OnClickListener {
+private const val TAG = "AddBudgetFragment"
+
+@AndroidEntryPoint
+class AddBudgetFragment : BottomSheetDialogFragment(), View.OnClickListener {
 
     private lateinit var binding: FragmentAddBudgetBinding
+    private val incomeViewModel: IncomeViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -34,6 +45,8 @@ class AddBudget : BottomSheetDialogFragment(), View.OnClickListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        observeViewModel()
+
         displayBottomSheet()
 
         handleButtonClick(
@@ -49,14 +62,11 @@ class AddBudget : BottomSheetDialogFragment(), View.OnClickListener {
         implementDropdown()
     }
 
-    private fun setupCategory(autoCompleteTextView: AutoCompleteTextView, arrayResId: Int) {
-        val category = resources.getStringArray(arrayResId)
-        val arrayAdapter = ArrayAdapter(
-            requireContext(),
-            androidx.appcompat.R.layout.support_simple_spinner_dropdown_item,
-            category
-        )
-        autoCompleteTextView.setAdapter(arrayAdapter)
+    private fun initializeButtonClick() {
+        binding.addIncomeBtn.setOnClickListener(this)
+        binding.addExpenseBtn.setOnClickListener(this)
+        binding.addTransferBtn.setOnClickListener(this)
+        binding.incomeLayout.saveButton.setOnClickListener(this)
     }
 
     private fun implementDropdown() {
@@ -70,10 +80,14 @@ class AddBudget : BottomSheetDialogFragment(), View.OnClickListener {
         setupCategory(binding.transferLayout.accountCategory, R.array.account_category)
     }
 
-    private fun initializeButtonClick() {
-        binding.addIncomeBtn.setOnClickListener(this)
-        binding.addExpenseBtn.setOnClickListener(this)
-        binding.addTransferBtn.setOnClickListener(this)
+    private fun setupCategory(autoCompleteTextView: AutoCompleteTextView, arrayResId: Int) {
+        val category = resources.getStringArray(arrayResId)
+        val arrayAdapter = ArrayAdapter(
+            requireContext(),
+            androidx.appcompat.R.layout.support_simple_spinner_dropdown_item,
+            category
+        )
+        autoCompleteTextView.setAdapter(arrayAdapter)
     }
 
     private fun displayBottomSheet() {
@@ -121,6 +135,10 @@ class AddBudget : BottomSheetDialogFragment(), View.OnClickListener {
                 visibleLayout = binding.flTransferLayout,
                 hiddenLayouts = listOf(binding.flIncomeLayout, binding.flExpenseLayout)
             )
+
+            R.id.save_button -> {
+                saveIncome()
+            }
         }
     }
 
@@ -147,6 +165,78 @@ class AddBudget : BottomSheetDialogFragment(), View.OnClickListener {
                 layout.visibility = View.GONE
             }
         }
+    }
+
+    private val incomeCategoryMap = mapOf(
+        "Salary" to 1,
+        "Bonus" to 2,
+        "Other" to 3
+    )
+
+    private val accountTypeMap = mapOf(
+        "Cash" to 1,
+        "Accounts" to 2,
+        "Card" to 3
+    )
+
+    private fun saveIncome() {
+        val categories = listOf(
+            IncomeCategory(name = "Salary"),
+            IncomeCategory(name = "Bonus"),
+            IncomeCategory(name = "Other")
+        )
+        incomeViewModel.insertIncomeCategories(categories)
+
+        val accountTypes = listOf(
+            AccountType(name = "Cash"),
+            AccountType(name = "Accounts"),
+            AccountType(name = "Card")
+        )
+        incomeViewModel.insertAccountTypes(accountTypes)
+
+        val amount = binding.incomeLayout.amountLayout.etAmount.text.toString().toDoubleOrNull()
+        val date = System.currentTimeMillis()
+        val categoryName = binding.incomeLayout.autoCompleteTextView.text.toString()
+        val categoryId = incomeCategoryMap[categoryName] ?: return showError("Invalid category")
+        val accountName = binding.incomeLayout.accountCategory.text.toString()
+        val accountId = accountTypeMap[accountName] ?: return showError("Invalid account")
+        val note = binding.incomeLayout.noteLayout.etNote.text.toString()
+
+        incomeViewModel.insertIncome(amount, date, categoryId, accountId, note)
+    }
+
+    private fun showError(message: String) {
+        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun observeViewModel() {
+        incomeViewModel.incomeCategories.observe(viewLifecycleOwner) {
+        }
+
+        incomeViewModel.accountTypes.observe(viewLifecycleOwner) {
+        }
+
+        incomeViewModel.incomeInsertState.observe(viewLifecycleOwner) { result ->
+            result.onSuccess {
+                clearInputFields()
+                Toast.makeText(requireContext(), "Income saved successfully!", Toast.LENGTH_SHORT)
+                    .show()
+            }.onFailure { exception ->
+                Log.e(TAG, "observeViewModel: Failed to save income $exception")
+                Toast.makeText(
+                    requireContext(),
+                    "Failed to save income: ${exception.localizedMessage}",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+    }
+
+    private fun clearInputFields() {
+        binding.incomeLayout.amountLayout.etAmount.text?.clear()
+        binding.incomeLayout.autoCompleteTextView.text.clear()
+        binding.incomeLayout.accountCategory.text.clear()
+        binding.incomeLayout.noteLayout.etNote.text?.clear()
     }
 
 }

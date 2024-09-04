@@ -9,7 +9,7 @@ data class Transfer(
     @PrimaryKey(autoGenerate = true) override val id: Int? = null,
     @ColumnInfo(name = "date") override val date: Long,
     @ColumnInfo(name = "amount") override val amount: Double,
-    @ColumnInfo(name = "sentFrom") val sentFrom: AccountType,
-    @ColumnInfo(name = "sentTo") val sentTo: AccountType,
+    @ColumnInfo(name = "sentFromAcc") val sentFrom: Int,
+    @ColumnInfo(name = "sentToAcc") val sentTo: Int,
     @ColumnInfo(name = "note") override val note: String
 ) : BaseModel(id, date, amount, sentFrom, note)

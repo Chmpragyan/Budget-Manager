@@ -34,7 +34,7 @@
         tools:layout="@layout/fragment_more" />
     <dialog
         android:id="@+id/add_budget"
-        android:name="com.example.budgetwise.presentation.view.AddBudget"
+        android:name="com.example.budgetwise.presentation.view.AddBudgetFragment"
         android:label="fragment_add_budget"
         tools:layout="@layout/fragment_add_budget" />
 

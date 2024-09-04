@@ -1,14 +1,15 @@
 package com.example.budgetwise.presentation.view
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.navigation.Navigation
+import androidx.fragment.app.Fragment
 import com.example.budgetwise.R
 import com.example.budgetwise.databinding.FragmentHomeBinding
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class HomeFragment : Fragment(), View.OnClickListener {
 
     private lateinit var binding: FragmentHomeBinding
@@ -27,14 +28,16 @@ class HomeFragment : Fragment(), View.OnClickListener {
         initializeButtonClick()
     }
 
-    private fun initializeButtonClick(){
+    private fun initializeButtonClick() {
         binding.fbFloatingButton.setOnClickListener(this)
     }
 
     override fun onClick(view: View?) {
-        when(view?.id){
-            R.id.fb_floating_button ->{
-                val bottomSheet = AddBudget()
+        when (view?.id) {
+            R.id.fb_floating_button -> {
+//                val action = HomeFragmentDirections.actionHomeFragmentToAddBudget()
+//                Navigation.findNavController(requireView()).navigate(action)
+                val bottomSheet = AddBudgetFragment()
                 bottomSheet.show(parentFragmentManager, "AddBudgetBottomSheet")
             }
         }
