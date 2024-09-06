@@ -17,7 +17,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/custom_text_field"
+        android:imeOptions="actionNext"
+        android:inputType="number|numberDecimal"
+        android:maxLines="1"
         android:padding="8dp"
-        tools:hint="Amount" />
+        tools:hint="Amount"
+        android:focusable="true"
+        android:focusableInTouchMode="true"/>
 
 </LinearLayout>

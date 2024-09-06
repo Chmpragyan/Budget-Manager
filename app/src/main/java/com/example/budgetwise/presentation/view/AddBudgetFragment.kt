@@ -16,6 +16,7 @@ import com.example.budgetwise.R
 import com.example.budgetwise.data.local.model.AccountType
 import com.example.budgetwise.data.local.model.IncomeCategory
 import com.example.budgetwise.databinding.FragmentAddBudgetBinding
+import com.example.budgetwise.extensions.formatDateTimeFromTimestamp
 import com.example.budgetwise.presentation.viewmodel.IncomeViewModel
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
@@ -28,6 +29,7 @@ class AddBudgetFragment : BottomSheetDialogFragment(), View.OnClickListener {
 
     private lateinit var binding: FragmentAddBudgetBinding
     private val incomeViewModel: IncomeViewModel by activityViewModels()
+    private var date: Long = 0
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -60,6 +62,12 @@ class AddBudgetFragment : BottomSheetDialogFragment(), View.OnClickListener {
         initializeButtonClick()
 
         implementDropdown()
+
+        val currentDate = System.currentTimeMillis()
+        val formattedDate = currentDate.formatDateTimeFromTimestamp()
+        Log.d("FormattedDate", "Formatted Date: $formattedDate")
+        binding.incomeLayout.dateLayout.etDate.setText(formattedDate)
+        date= currentDate
     }
 
     private fun initializeButtonClick() {
@@ -195,7 +203,6 @@ class AddBudgetFragment : BottomSheetDialogFragment(), View.OnClickListener {
         incomeViewModel.insertAccountTypes(accountTypes)
 
         val amount = binding.incomeLayout.amountLayout.etAmount.text.toString().toDoubleOrNull()
-        val date = System.currentTimeMillis()
         val categoryName = binding.incomeLayout.autoCompleteTextView.text.toString()
         val categoryId = incomeCategoryMap[categoryName] ?: return showError("Invalid category")
         val accountName = binding.incomeLayout.accountCategory.text.toString()

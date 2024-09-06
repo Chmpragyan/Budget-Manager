@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.budgetwise.data.local.model.AccountType
+import com.example.budgetwise.data.local.model.Income
 import com.example.budgetwise.data.local.model.IncomeCategory
 import com.example.budgetwise.data.local.repository.IncomeRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,6 +19,8 @@ class IncomeViewModel @Inject constructor(private val incomeRepository: IncomeRe
     private val _incomeInsertState = MutableLiveData<Result<Unit>>()
     val incomeInsertState: LiveData<Result<Unit>> = _incomeInsertState
 
+    var income: LiveData<List<Income>>? = null
+
     private val _incomeCategories = MutableLiveData<List<IncomeCategory>>()
     val incomeCategories: LiveData<List<IncomeCategory>> = _incomeCategories
 
@@ -26,6 +29,7 @@ class IncomeViewModel @Inject constructor(private val incomeRepository: IncomeRe
 
     init {
         viewModelScope.launch {
+            income = incomeRepository.getAllIncome()
             _incomeCategories.value = incomeRepository.getAllIncomeCategories()
             _accountTypes.value = incomeRepository.getAllAccountTypes()
         }

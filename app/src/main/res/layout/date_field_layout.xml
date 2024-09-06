@@ -17,6 +17,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/custom_text_field"
+        android:enabled="false"
         android:padding="8dp"
         tools:hint="Date" />
 

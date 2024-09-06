@@ -1,5 +1,6 @@
 package com.example.budgetwise.data.local.repository
 
+import androidx.lifecycle.LiveData
 import com.example.budgetwise.dao.AccountTypeDao
 import com.example.budgetwise.dao.IncomeCategoryDao
 import com.example.budgetwise.dao.IncomeDao
@@ -56,6 +57,11 @@ class IncomeRepository @Inject constructor(
         }
     }
 
+    suspend fun getAllIncome(): LiveData<List<Income>> {
+        return withContext(Dispatchers.IO){
+            incomeDao.getAllIncome()
+        }
+    }
 
     suspend fun getAllIncomeCategories(): List<IncomeCategory> {
         return withContext(Dispatchers.IO) {
