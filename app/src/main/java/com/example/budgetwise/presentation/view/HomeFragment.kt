@@ -1,6 +1,7 @@
 package com.example.budgetwise.presentation.view
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,6 +18,8 @@ import com.example.budgetwise.presentation.viewmodel.IncomeViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
+private const val TAG = "HomeFragment"
+
 @AndroidEntryPoint
 class HomeFragment : Fragment(), View.OnClickListener {
 
@@ -27,8 +30,6 @@ class HomeFragment : Fragment(), View.OnClickListener {
     private lateinit var budgetAdapter: BudgetAdapter
 
     private lateinit var incomeList: ArrayList<Income>
-//    private lateinit var incomeCatList: ArrayList<IncomeCategory>
-//    private lateinit var accountType: ArrayList<AccountType>
 
     private val incomeCatList = listOf(
         IncomeCategory(1, "Salary"),
@@ -55,15 +56,23 @@ class HomeFragment : Fragment(), View.OnClickListener {
 
         initializeButtonClick()
 
+        incomeList = ArrayList()
+
         incomeViewModel.income?.observe(viewLifecycleOwner) { list ->
             list?.let {
-                incomeList = ArrayList()
-//                incomeCatList = ArrayList() as l
-//                accountType = ArrayList()
                 incomeList.addAll(it)
                 setRecyclerView()
+                getTotalIncome()
             }
         }
+    }
+
+    private fun getTotalIncome() {
+        var totalIncome = 0.0
+        for (income in incomeList) {
+            totalIncome += income.amount
+        }
+        binding.tvIncomeAmount.text = totalIncome.toString()
     }
 
     private fun initializeButtonClick() {

@@ -6,13 +6,141 @@
     android:layout_height="match_parent"
     tools:context=".presentation.view.HomeFragment">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_recycler_view"
+    <TextView
+        android:id="@+id/tv_income_title"
         android:layout_width="0dp"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Income"
+        android:textAlignment="center"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintWidth_percent="0.33" />
+
+    <TextView
+        android:id="@+id/tv_income_amount"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="10,000"
+        android:textAlignment="center"
+        android:textColor="@color/button_pressed"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_income_title"
+        app:layout_constraintWidth_percent="0.33" />
+
+    <TextView
+        android:id="@+id/tv_expense_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Expense"
+        android:textAlignment="center"
+        app:layout_constraintStart_toEndOf="@id/tv_income_title"
+        app:layout_constraintTop_toTopOf="@id/tv_income_title"
+        app:layout_constraintWidth_percent="0.33" />
+
+    <TextView
+        android:id="@+id/tv_expense_amount"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="5,000"
+        android:textAlignment="center"
+        android:textColor="@color/button_bg"
+        app:layout_constraintStart_toEndOf="@id/tv_income_title"
+        app:layout_constraintTop_toBottomOf="@id/tv_expense_title"
+        app:layout_constraintWidth_percent="0.33" />
+
+    <TextView
+        android:id="@+id/tv_total_budget_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Total"
+        android:textAlignment="center"
+        app:layout_constraintStart_toEndOf="@+id/tv_expense_title"
+        app:layout_constraintTop_toTopOf="@id/tv_income_title"
+        app:layout_constraintWidth_percent="0.33" />
+
+    <TextView
+        android:id="@+id/tv_total_remaining_amount"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="5,000"
+        android:textAlignment="center"
+        app:layout_constraintStart_toEndOf="@+id/tv_expense_title"
+        app:layout_constraintTop_toBottomOf="@id/tv_total_budget_title"
+        app:layout_constraintWidth_percent="0.33" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/gl_guideline_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.05" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginVertical="8dp"
+        android:layout_weight="1"
+        android:background="@color/horizontal_line"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/gl_guideline_date" />
+
+    <TextView
+        android:id="@+id/tv_display_date"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:text="09.06.2024"
+        android:textAlignment="center"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/gl_guideline_date"
+        app:layout_constraintWidth_percent="0.33" />
+
+    <TextView
+        android:id="@+id/tv_display_income_date"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="1000"
+        android:textAlignment="center"
+        app:layout_constraintStart_toEndOf="@id/tv_display_date"
+        app:layout_constraintTop_toTopOf="@id/tv_display_date"
+        app:layout_constraintWidth_percent="0.33" />
+
+    <TextView
+        android:id="@+id/tv_display_expense_date"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="500"
+        android:textAlignment="center"
+        app:layout_constraintStart_toEndOf="@+id/tv_display_income_date"
+        app:layout_constraintTop_toTopOf="@id/tv_display_date"
+        app:layout_constraintWidth_percent="0.33" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/gl_guideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.1" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginVertical="8dp"
+        android:layout_weight="1"
+        android:background="@color/horizontal_line"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/gl_guideline" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/gl_guideline" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fb_floating_button"

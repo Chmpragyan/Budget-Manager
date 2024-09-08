@@ -15,13 +15,21 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:text="Salary" />
 
+    <androidx.constraintlayout.widget.Guideline
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/gl_guideline"
+        app:layout_constraintGuide_percent="0.13"
+        android:orientation="vertical"/>
+
     <TextView
         android:id="@+id/tv_note"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="8dp"
         android:textSize="@dimen/note_size"
-        app:layout_constraintStart_toEndOf="@+id/tv_category"
+        android:textStyle="bold"
+        app:layout_constraintStart_toEndOf="@+id/gl_guideline"
         app:layout_constraintTop_toTopOf="@+id/tv_category"
         tools:text="Salary Bhadra" />
 
@@ -39,6 +47,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
+        android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/tv_note"
         tools:text="Rs. 5000" />
