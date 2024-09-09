@@ -1,5 +1,6 @@
 package com.example.budgetwise.presentation.adapter
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
@@ -55,28 +56,39 @@ class BudgetAdapter @Inject constructor(
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        if (position < income.size) {
-            val incomeItem = income[position]
+        when (holder) {
+            is IncomeVH -> {
+                if (position < income.size) {
+                    val incomeItem = income[position]
+                    val dailyTotalExpense = calculateDailyTotalExpense(incomeItem.date)
+                    val dailyTotalIncome = calculateDailyTotalIncome(incomeItem.date)
+                    holder.onBind(
+                        incomeItem, incomeCategoryMapById, accountTypeMapById,
+                        shouldShowDate(position),
+                        dailyTotalIncome,
+                        dailyTotalExpense
+                    )
+                } else {
+                    Log.e(TAG, "Position $position out of bounds for income list")
+                }
+            }
 
-            val expenseItem = expense[position]
-            val dailyTotalExpense = calculateDailyTotalExpense(expenseItem.date)
+            is ExpenseVH -> {
+                val expensePosition = position - income.size
+                if (expensePosition in expense.indices) {
+                    val expenseItem = expense[expensePosition]
+                    holder.onBind(
+                        expenseItem,
+                        expenseCategoryMapById,
+                        accountTypeMapById,
+                        shouldShowDate(position),
+                    )
+                } else {
+                    Log.e(TAG, "Position $position out of bounds for expense list")
+                }
+            }
 
-            val dailyTotalIncome = calculateDailyTotalIncome(incomeItem.date)
-            (holder as IncomeVH).onBind(
-                incomeItem, incomeCategoryMapById, accountTypeMapById,
-                shouldShowDate(position),
-                dailyTotalIncome,
-                dailyTotalExpense
-            )
-        } else {
-            val expensePosition = position - income.size
-            val expenseItem = expense[expensePosition]
-            (holder as ExpenseVH).onBind(
-                expenseItem,
-                expenseCategoryMapById,
-                accountTypeMapById,
-                shouldShowDate(position),
-            )
+            else -> throw IllegalArgumentException("Invalid view holder type")
         }
     }
 

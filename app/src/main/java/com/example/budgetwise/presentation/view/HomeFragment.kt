@@ -1,7 +1,6 @@
 package com.example.budgetwise.presentation.view
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -19,7 +18,6 @@ import com.example.budgetwise.presentation.adapter.BudgetAdapter
 import com.example.budgetwise.presentation.viewmodel.ExpenseViewModel
 import com.example.budgetwise.presentation.viewmodel.IncomeViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 
 private const val TAG = "HomeFragment"
 
@@ -75,10 +73,12 @@ class HomeFragment : Fragment(), View.OnClickListener {
         incomeList = ArrayList()
         expenseList = ArrayList()
 
+        setRecyclerView()
+
         incomeViewModel.income?.observe(viewLifecycleOwner) { list ->
             list?.let {
+                incomeList.clear()
                 incomeList.addAll(it)
-                setRecyclerView()
                 budgetAdapter.notifyDataSetChanged()
                 updateBudgetTotals()
             }
@@ -86,8 +86,8 @@ class HomeFragment : Fragment(), View.OnClickListener {
 
         expenseViewModel.expense?.observe(viewLifecycleOwner) { list ->
             list?.let {
+                expenseList.clear()
                 expenseList.addAll(it)
-                setRecyclerView()
                 budgetAdapter.notifyDataSetChanged()
                 updateBudgetTotals()
             }

@@ -53,5 +53,17 @@ class IncomeViewModel @Inject constructor(private val incomeRepository: IncomeRe
             incomeRepository.insertAccountTypes(accountTypes)
         }
     }
+
+    fun getIncomeByCategory(): Map<String, Double> {
+        val categories = incomeCategories.value.orEmpty()
+        val incomeList = income?.value.orEmpty()
+
+        // Aggregate income amounts by category
+        return incomeList.groupBy { incomeItem ->
+            categories.find { it.id == incomeItem.incCategoryId }?.name ?: "Unknown"
+        }.mapValues { (_, incomes) ->
+            incomes.sumOf { it.amount }
+        }
+    }
 }
 

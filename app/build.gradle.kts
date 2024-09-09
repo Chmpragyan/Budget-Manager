@@ -87,4 +87,7 @@ dependencies {
 
     // Gson
     implementation (libs.gson)
+
+    // AndroidChart
+    implementation(libs.mpandroidchart)
 }
