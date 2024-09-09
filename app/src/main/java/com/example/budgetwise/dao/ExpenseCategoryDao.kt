@@ -11,6 +11,6 @@ interface ExpenseCategoryDao {
     @Insert
     suspend fun insertExpenseCategories(incomeCategories: List<ExpenseCategory>)
 
-    @Query("SELECT * FROM income_category")
-    suspend fun getAllExpenseCategories(): LiveData<List<ExpenseCategory>>
+    @Query("SELECT * FROM expense_category")
+    fun getAllExpenseCategories(): LiveData<List<ExpenseCategory>>
 }

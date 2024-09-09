@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
+import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.Toast
 import androidx.annotation.StringRes
@@ -14,9 +15,11 @@ import androidx.appcompat.widget.AppCompatButton
 import androidx.fragment.app.activityViewModels
 import com.example.budgetwise.R
 import com.example.budgetwise.data.local.model.AccountType
+import com.example.budgetwise.data.local.model.ExpenseCategory
 import com.example.budgetwise.data.local.model.IncomeCategory
 import com.example.budgetwise.databinding.FragmentAddBudgetBinding
 import com.example.budgetwise.extensions.formatDateTimeFromTimestamp
+import com.example.budgetwise.presentation.viewmodel.ExpenseViewModel
 import com.example.budgetwise.presentation.viewmodel.IncomeViewModel
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
@@ -29,7 +32,13 @@ class AddBudgetFragment : BottomSheetDialogFragment(), View.OnClickListener {
 
     private lateinit var binding: FragmentAddBudgetBinding
     private val incomeViewModel: IncomeViewModel by activityViewModels()
+    private val expenseViewModel: ExpenseViewModel by activityViewModels()
     private var date: Long = 0
+    private val accountTypes = listOf(
+        AccountType(name = "Cash"),
+        AccountType(name = "Accounts"),
+        AccountType(name = "Card")
+    )
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -49,6 +58,8 @@ class AddBudgetFragment : BottomSheetDialogFragment(), View.OnClickListener {
 
         observeViewModel()
 
+        observeViewModelExpense()
+
         displayBottomSheet()
 
         handleButtonClick(
@@ -67,7 +78,13 @@ class AddBudgetFragment : BottomSheetDialogFragment(), View.OnClickListener {
         val formattedDate = currentDate.formatDateTimeFromTimestamp()
         Log.d("FormattedDate", "Formatted Date: $formattedDate")
         binding.incomeLayout.dateLayout.etDate.setText(formattedDate)
-        date= currentDate
+        date = currentDate
+
+        val currentDateExp = System.currentTimeMillis()
+        val formattedDateExp = currentDateExp.formatDateTimeFromTimestamp()
+        Log.d("FormattedDate", "Formatted Date: $formattedDateExp")
+        binding.expenseLayout.dateLayout.etDate.setText(formattedDateExp)
+        date = currentDate
     }
 
     private fun initializeButtonClick() {
@@ -75,6 +92,7 @@ class AddBudgetFragment : BottomSheetDialogFragment(), View.OnClickListener {
         binding.addExpenseBtn.setOnClickListener(this)
         binding.addTransferBtn.setOnClickListener(this)
         binding.incomeLayout.saveButton.setOnClickListener(this)
+        binding.expenseLayout.bnSaveExpense.setOnClickListener(this)
     }
 
     private fun implementDropdown() {
@@ -146,6 +164,11 @@ class AddBudgetFragment : BottomSheetDialogFragment(), View.OnClickListener {
 
             R.id.save_button -> {
                 saveIncome()
+
+            }
+
+            R.id.bn_save_expense -> {
+                saveExpense()
             }
         }
     }
@@ -181,6 +204,15 @@ class AddBudgetFragment : BottomSheetDialogFragment(), View.OnClickListener {
         "Other" to 3
     )
 
+    private val expenseCategoryMap = mapOf(
+        "Food" to 1,
+        "Clothing" to 2,
+        "Education" to 3,
+        "Health" to 4,
+        "Fun" to 5,
+        "Travel" to 6
+    )
+
     private val accountTypeMap = mapOf(
         "Cash" to 1,
         "Accounts" to 2,
@@ -195,11 +227,6 @@ class AddBudgetFragment : BottomSheetDialogFragment(), View.OnClickListener {
         )
         incomeViewModel.insertIncomeCategories(categories)
 
-        val accountTypes = listOf(
-            AccountType(name = "Cash"),
-            AccountType(name = "Accounts"),
-            AccountType(name = "Card")
-        )
         incomeViewModel.insertAccountTypes(accountTypes)
 
         val amount = binding.incomeLayout.amountLayout.etAmount.text.toString().toDoubleOrNull()
@@ -210,6 +237,29 @@ class AddBudgetFragment : BottomSheetDialogFragment(), View.OnClickListener {
         val note = binding.incomeLayout.noteLayout.etNote.text.toString()
 
         incomeViewModel.insertIncome(amount, date, categoryId, accountId, note)
+    }
+
+    private fun saveExpense() {
+        val categories = listOf(
+            ExpenseCategory(name = "Food"),
+            ExpenseCategory(name = "Clothing"),
+            ExpenseCategory(name = "Education"),
+            ExpenseCategory(name = "Health"),
+            ExpenseCategory(name = "Entertainment"),
+            ExpenseCategory(name = "Travel")
+        )
+        expenseViewModel.insertExpenseCategories(categories)
+
+        expenseViewModel.insertAccountTypes(accountTypes)
+
+        val amount = binding.expenseLayout.amountLayout.etAmount.text.toString().toDoubleOrNull()
+        val categoryName = binding.expenseLayout.autoCompleteTextView.text.toString()
+        val categoryId = expenseCategoryMap[categoryName] ?: return showError("Invalid category")
+        val accountName = binding.expenseLayout.accountCategory.text.toString()
+        val accountId = accountTypeMap[accountName] ?: return showError("Invalid account")
+        val note = binding.expenseLayout.noteLayout.etNote.text.toString()
+
+        expenseViewModel.insertExpense(amount, date, categoryId, accountId, note)
     }
 
     private fun showError(message: String) {
@@ -225,7 +275,13 @@ class AddBudgetFragment : BottomSheetDialogFragment(), View.OnClickListener {
 
         incomeViewModel.incomeInsertState.observe(viewLifecycleOwner) { result ->
             result.onSuccess {
-                clearInputFields()
+                clearInputFields(
+                    binding.incomeLayout.amountLayout.etAmount,
+                    binding.incomeLayout.autoCompleteTextView,
+                    binding.incomeLayout.accountCategory,
+                    binding.incomeLayout.noteLayout.etNote
+                )
+
                 Toast.makeText(requireContext(), "Income saved successfully!", Toast.LENGTH_SHORT)
                     .show()
             }.onFailure { exception ->
@@ -239,11 +295,43 @@ class AddBudgetFragment : BottomSheetDialogFragment(), View.OnClickListener {
         }
     }
 
-    private fun clearInputFields() {
-        binding.incomeLayout.amountLayout.etAmount.text?.clear()
-        binding.incomeLayout.autoCompleteTextView.text.clear()
-        binding.incomeLayout.accountCategory.text.clear()
-        binding.incomeLayout.noteLayout.etNote.text?.clear()
+    private fun observeViewModelExpense() {
+        expenseViewModel.expenseCategory?.observe(viewLifecycleOwner) {
+        }
+
+        expenseViewModel.accountTypes.observe(viewLifecycleOwner) {
+        }
+
+        expenseViewModel.insertExpense.observe(viewLifecycleOwner) { result ->
+            result.onSuccess {
+                clearInputFields(
+                    binding.expenseLayout.amountLayout.etAmount,
+                    binding.expenseLayout.autoCompleteTextView,
+                    binding.expenseLayout.accountCategory,
+                    binding.expenseLayout.noteLayout.etNote
+                )
+                Toast.makeText(requireContext(), "Expense saved successfully!", Toast.LENGTH_SHORT)
+                    .show()
+            }.onFailure { exception ->
+                Log.e(TAG, "observeViewModel: Failed to save expense $exception")
+                Toast.makeText(
+                    requireContext(),
+                    "Failed to save expense: ${exception.localizedMessage}",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
     }
 
+    private fun clearInputFields(
+        amountEditText: EditText,
+        categoryAutoCompleteTextView: AutoCompleteTextView,
+        accountEditText: EditText,
+        noteEditText: EditText
+    ) {
+        amountEditText.text?.clear()
+        categoryAutoCompleteTextView.text.clear()
+        accountEditText.text.clear()
+        noteEditText.text?.clear()
+    }
 }

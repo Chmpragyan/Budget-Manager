@@ -23,13 +23,14 @@ class ExpenseViewModel @Inject constructor(private val expenseRepository: Expens
 
     var expenseCategory: LiveData<List<ExpenseCategory>>? = null
 
-    var accountCategory: List<AccountType>? = null
+    private val _accountTypes = MutableLiveData<List<AccountType>>()
+    val accountTypes: LiveData<List<AccountType>> = _accountTypes
 
     init {
         viewModelScope.launch {
             expense = expenseRepository.getAllExpense()
             expenseCategory = expenseRepository.getAllExpenseCategories()
-            accountCategory = expenseRepository.getAllAccountTypes()
+            _accountTypes.value = expenseRepository.getAllAccountTypes()
         }
     }
 

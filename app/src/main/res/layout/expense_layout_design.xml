@@ -11,31 +11,31 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
-        tools:text="09.06.2024"
         android:textAlignment="center"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintWidth_percent="0.33" />
+        app:layout_constraintWidth_percent="0.33"
+        tools:text="09.06.2024" />
 
     <TextView
-        android:id="@+id/tv_display_inc_date"
+        android:id="@+id/tv_display_income_date"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        tools:text="1000"
         android:textAlignment="center"
         app:layout_constraintStart_toEndOf="@id/tv_display_date"
         app:layout_constraintTop_toTopOf="@id/tv_display_date"
-        app:layout_constraintWidth_percent="0.33" />
+        app:layout_constraintWidth_percent="0.33"
+        tools:text="1000" />
 
     <TextView
-        android:id="@+id/tv_display_exp_date"
+        android:id="@+id/tv_display_expense_date"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        tools:text="500"
         android:textAlignment="center"
-        app:layout_constraintStart_toEndOf="@+id/tv_display_inc_date"
+        app:layout_constraintStart_toEndOf="@+id/tv_display_income_date"
         app:layout_constraintTop_toTopOf="@id/tv_display_date"
-        app:layout_constraintWidth_percent="0.33" />
+        app:layout_constraintWidth_percent="0.33"
+        tools:text="500" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/gl_guideline_date"
@@ -50,12 +50,12 @@
         android:layout_marginVertical="8dp"
         android:layout_weight="1"
         android:background="@color/horizontal_line"
+        app:layout_constraintBottom_toBottomOf="@id/gl_guideline_date"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toBottomOf="@id/gl_guideline_date" />
+        app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
-        android:id="@+id/tv_category"
+        android:id="@+id/tv_category_expense"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:textSize="@dimen/category_size"
@@ -64,40 +64,40 @@
         tools:text="Salary" />
 
     <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/gl_guideline"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/gl_guideline"
-        app:layout_constraintGuide_percent="0.15"
-        android:orientation="vertical"/>
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.15" />
 
     <TextView
-        android:id="@+id/tv_note"
+        android:id="@+id/tv_note_expense"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:textSize="@dimen/note_size"
         android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@+id/gl_guideline"
-        app:layout_constraintTop_toTopOf="@+id/tv_category"
+        app:layout_constraintTop_toTopOf="@+id/tv_category_expense"
         tools:text="Salary Bhadra" />
 
     <TextView
-        android:id="@+id/tv_account_type"
+        android:id="@+id/tv_account_type_expense"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:textSize="@dimen/account_type_size"
-        app:layout_constraintStart_toStartOf="@id/tv_note"
-        app:layout_constraintTop_toBottomOf="@+id/tv_note"
+        app:layout_constraintStart_toStartOf="@id/tv_note_expense"
+        app:layout_constraintTop_toBottomOf="@+id/tv_note_expense"
         tools:text="Cash" />
 
     <TextView
-        android:id="@+id/tv_amount"
+        android:id="@+id/tv_amount_expense"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
-        android:textStyle="bold"
+        android:textColor="@color/red"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/tv_note"
+        app:layout_constraintTop_toTopOf="@id/tv_note_expense"
         tools:text="Rs. 5000" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

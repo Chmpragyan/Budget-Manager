@@ -82,13 +82,12 @@
         app:layout_constraintTop_toBottomOf="@+id/et_account_category" />
 
     <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/login_button"
+        android:id="@+id/bn_save_expense"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="8dp"
         android:layout_marginTop="16dp"
         android:background="@drawable/custom_add_button"
-        android:enabled="false"
         android:maxWidth="300dp"
         android:text="@string/save_btn"
         android:textAllCaps="false"

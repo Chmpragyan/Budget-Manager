@@ -19,6 +19,7 @@
     <string name="choose_account_category">Category</string>
     <string name="send_from_transfer">From</string>
     <string name="send_to_transfer">To</string>
+    <string name="total_tv">Total</string>
 
     <string-array name="income_category">
         <item>Salary</item>

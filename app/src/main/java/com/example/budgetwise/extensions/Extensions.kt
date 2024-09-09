@@ -9,3 +9,9 @@ fun Long.formatDateTimeFromTimestamp(): String {
     val date = Date(this)
     return dateFormat.format(date).uppercase(Locale.getDefault())
 }
+
+fun Long.formatDate(): String {
+    val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+    val date = Date(this)
+    return dateFormat.format(date).uppercase(Locale.getDefault())
+}
