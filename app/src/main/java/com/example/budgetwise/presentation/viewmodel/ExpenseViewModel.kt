@@ -7,57 +7,72 @@ import androidx.lifecycle.viewModelScope
 import com.example.budgetwise.data.local.model.AccountType
 import com.example.budgetwise.data.local.model.Expense
 import com.example.budgetwise.data.local.model.ExpenseCategory
-import com.example.budgetwise.data.local.model.Income
 import com.example.budgetwise.data.local.repository.ExpenseRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class ExpenseViewModel @Inject constructor(private val expenseRepository: ExpenseRepository) :
     ViewModel() {
-    private val _insertExpense = MutableLiveData<Result<Unit>>()
-    val insertExpense: LiveData<Result<Unit>> = _insertExpense
+    private val _expenseInsertState = MutableLiveData<Result<Unit>>()
+    val expenseInsertState: LiveData<Result<Unit>> = _expenseInsertState
 
-    var expense: LiveData<List<Expense>>? = null
+    val expense: LiveData<List<Expense>> = expenseRepository.getAllExpense()
 
-    var expenseCategory: LiveData<List<ExpenseCategory>>? = null
+    val expenseCategories: LiveData<List<ExpenseCategory>> =
+        expenseRepository.getAllExpenseCategories()
 
-    private val _accountTypes = MutableLiveData<List<AccountType>>()
-    val accountTypes: LiveData<List<AccountType>> = _accountTypes
+    val accountTypes: LiveData<List<AccountType>> = expenseRepository.getAllAccountTypes()
 
-    init {
+    fun insertExpense(amount: Double?, date: Long, categoryId: Int, accountId: Int, note: String?) {
         viewModelScope.launch {
-            expense = expenseRepository.getAllExpense()
-            expenseCategory = expenseRepository.getAllExpenseCategories()
-            _accountTypes.value = expenseRepository.getAllAccountTypes()
+            try {
+                if (amount != null && note != null) {
+                    val expense = Expense(
+                        date = date,
+                        amount = amount,
+                        expCategoryId = categoryId,
+                        accountId = accountId,
+                        note = note
+                    )
+                    expenseRepository.insertExpense(expense)
+                    _expenseInsertState.postValue(Result.success(Unit))
+                } else {
+                    _expenseInsertState.postValue(Result.failure(IllegalArgumentException("Invalid input data")))
+                }
+            } catch (e: Exception) {
+                _expenseInsertState.postValue(Result.failure(e))
+            }
         }
     }
 
-    fun insertExpense(amount: Double?, date: Long, categoryId: Int, accountId: Int, note: String) {
-        viewModelScope.launch {
-            val result = expenseRepository.insertExpense(amount, date, categoryId, accountId, note)
-            _insertExpense.value = result
-        }
-    }
+    fun insertExpenseCategories(expenseCategories: List<ExpenseCategory>) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                expenseRepository.insertExpenseCategories(expenseCategories)
+            } catch (_: Exception) {
 
-    fun insertExpenseCategories(incomeCategories: List<ExpenseCategory>) {
-        viewModelScope.launch {
-            expenseRepository.insertExpenseCategories(incomeCategories)
+            }
         }
     }
 
     fun insertAccountTypes(accountTypes: List<AccountType>) {
-        viewModelScope.launch {
-            expenseRepository.insertAccountTypes(accountTypes)
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                expenseRepository.insertAccountTypes(accountTypes)
+            } catch (_: Exception) {
+
+            }
         }
     }
 
     fun getExpenseByCategory(): Map<String, Double> {
-        val categories = expenseCategory?.value.orEmpty()
-        val expenseList = expense?.value.orEmpty()
+        val categories = expenseCategories.value.orEmpty()
+        val expenseList = expense.value.orEmpty()
 
-        // Aggregate income amounts by category
+        // Aggregate expense amounts by category
         return expenseList.groupBy { expenseItem ->
             categories.find { it.id == expenseItem.expCategoryId }?.name ?: "Unknown"
         }.mapValues { (_, expenses) ->

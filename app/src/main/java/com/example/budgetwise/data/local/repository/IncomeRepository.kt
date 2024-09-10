@@ -17,61 +17,43 @@ class IncomeRepository @Inject constructor(
     private val accountTypeDao: AccountTypeDao
 ) {
 
-    suspend fun insertIncome(
-        amount: Double?,
-        date: Long,
-        categoryId: Int,
-        accountId: Int,
-        note: String
-    ): Result<Unit> {
+    suspend fun insertIncome(income: Income): Result<Unit> {
         return try {
-            if (amount != null && note.isNotEmpty()) {
-                val income = Income(
-                    date = date,
-                    amount = amount,
-                    incCategoryId = categoryId,
-                    accountId = accountId,
-                    note = note
-                )
-                withContext(Dispatchers.IO) {
-                    incomeDao.insertIncome(income)
-                }
-                Result.success(Unit)
-            } else {
-                Result.failure(IllegalArgumentException("Invalid input data"))
-            }
+            incomeDao.insertIncome(income)
+            Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
 
-    suspend fun insertIncomeCategories(incomeCategories: List<IncomeCategory>) {
-        withContext(Dispatchers.IO) {
+    suspend fun insertIncomeCategories(incomeCategories: List<IncomeCategory>): Result<Unit> {
+        return try {
             incomeCategoryDao.insertIncomeCategories(incomeCategories)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
         }
     }
 
-    suspend fun insertAccountTypes(accountTypes: List<AccountType>) {
-        withContext(Dispatchers.IO) {
+    suspend fun insertAccountTypes(accountTypes: List<AccountType>): Result<Unit> {
+        return try {
             accountTypeDao.insertAccountTypes(accountTypes)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
         }
     }
 
-    suspend fun getAllIncome(): LiveData<List<Income>> {
-        return withContext(Dispatchers.IO){
-            incomeDao.getAllIncome()
-        }
+    fun getAllIncome(): LiveData<List<Income>> {
+        return incomeDao.getAllIncome()
     }
 
-    suspend fun getAllIncomeCategories(): List<IncomeCategory> {
-        return withContext(Dispatchers.IO) {
-            incomeCategoryDao.getAllIncomeCategories()
-        }
+    fun getAllIncomeCategories(): LiveData<List<IncomeCategory>> {
+        return incomeCategoryDao.getAllIncomeCategories()
     }
 
-    suspend fun getAllAccountTypes(): List<AccountType> {
-        return withContext(Dispatchers.IO) {
-            accountTypeDao.getAllAccountTypes()
-        }
+    fun getAllAccountTypes(): LiveData<List<AccountType>> {
+        return accountTypeDao.getAllAccountTypes()
     }
 }
+

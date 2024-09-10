@@ -7,6 +7,7 @@ import android.graphics.Path
 import android.graphics.PorterDuff
 import android.graphics.RectF
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -27,6 +28,8 @@ import com.example.budgetwise.presentation.adapter.BudgetAdapter
 import com.example.budgetwise.presentation.viewmodel.ExpenseViewModel
 import com.example.budgetwise.presentation.viewmodel.IncomeViewModel
 import dagger.hilt.android.AndroidEntryPoint
+
+private const val TAG = "HomeFragment"
 
 @AndroidEntryPoint
 class HomeFragment : Fragment(), View.OnClickListener {
@@ -79,30 +82,28 @@ class HomeFragment : Fragment(), View.OnClickListener {
 
         initializeButtonClick()
 
-        incomeList = ArrayList()
-        expenseList = ArrayList()
+        setRecyclerView()
 
-//        setRecyclerView()
-//
-        incomeViewModel.income?.observe(viewLifecycleOwner) { list ->
+
+        incomeViewModel.income.observe(viewLifecycleOwner) { list ->
             list?.let {
+                Log.d(TAG, "Income data received: $it")
                 incomeList.clear()
                 incomeList.addAll(it)
-                setRecyclerView()
-//                swipeToDelFeatures()
                 budgetAdapter.notifyDataSetChanged()
                 updateBudgetTotals()
+                swipeToDelFeatures()
             }
         }
 
-        expenseViewModel.expense?.observe(viewLifecycleOwner) { list ->
+        expenseViewModel.expense.observe(viewLifecycleOwner) { list ->
             list?.let {
+                Log.d(TAG, "Expense data received: $it")
                 expenseList.clear()
                 expenseList.addAll(it)
-                setRecyclerView()
-//                swipeToDelFeatures()
                 budgetAdapter.notifyDataSetChanged()
                 updateBudgetTotals()
+                swipeToDelFeatures()
             }
         }
     }
@@ -139,6 +140,8 @@ class HomeFragment : Fragment(), View.OnClickListener {
     }
 
     private fun setRecyclerView() {
+        incomeList = ArrayList()
+        expenseList = ArrayList()
         budgetAdapter =
             BudgetAdapter(expenseList, incomeList, incomeCatList, expenseCategory, accountType)
         binding.rvRecyclerView.layoutManager = LinearLayoutManager(requireContext())

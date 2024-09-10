@@ -1,7 +1,6 @@
 package com.example.budgetwise.presentation.view
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -291,13 +290,13 @@ class AddBudgetFragment : BottomSheetDialogFragment(), View.OnClickListener {
     }
 
     private fun observeViewModelExpense() {
-        expenseViewModel.expenseCategory?.observe(viewLifecycleOwner) {
+        expenseViewModel.expenseCategories.observe(viewLifecycleOwner) {
         }
 
         expenseViewModel.accountTypes.observe(viewLifecycleOwner) {
         }
 
-        expenseViewModel.insertExpense.observe(viewLifecycleOwner) { result ->
+        expenseViewModel.expenseInsertState.observe(viewLifecycleOwner) { result ->
             result.onSuccess {
                 clearInputFields(
                     binding.expenseLayout.amountLayout.etAmount,

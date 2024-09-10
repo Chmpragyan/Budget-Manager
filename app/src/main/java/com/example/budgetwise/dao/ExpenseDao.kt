@@ -11,7 +11,7 @@ import com.example.budgetwise.data.local.model.Income
 interface ExpenseDao {
 
     @Insert
-    fun insertExpenses(expense: Expense)
+    suspend fun insertExpenses(expense: Expense)
 
     @Query("SELECT * FROM expense_table")
     fun getAllExpense(): LiveData<List<Expense>>

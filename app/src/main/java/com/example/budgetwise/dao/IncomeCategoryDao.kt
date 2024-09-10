@@ -1,5 +1,6 @@
 package com.example.budgetwise.dao
 
+import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
@@ -12,5 +13,5 @@ interface IncomeCategoryDao {
     suspend fun insertIncomeCategories(incomeCategories: List<IncomeCategory>)
 
     @Query("SELECT * FROM income_category")
-    suspend fun getAllIncomeCategories(): List<IncomeCategory>
+    fun getAllIncomeCategories(): LiveData<List<IncomeCategory>>
 }

@@ -20,43 +20,57 @@ class IncomeViewModel @Inject constructor(private val incomeRepository: IncomeRe
     private val _incomeInsertState = MutableLiveData<Result<Unit>>()
     val incomeInsertState: LiveData<Result<Unit>> = _incomeInsertState
 
-    var income: LiveData<List<Income>>? = null
+    val income: LiveData<List<Income>> = incomeRepository.getAllIncome()
 
-    private val _incomeCategories = MutableLiveData<List<IncomeCategory>>()
-    val incomeCategories: LiveData<List<IncomeCategory>> = _incomeCategories
+    val incomeCategories: LiveData<List<IncomeCategory>> = incomeRepository.getAllIncomeCategories()
 
-    private val _accountTypes = MutableLiveData<List<AccountType>>()
-    val accountTypes: LiveData<List<AccountType>> = _accountTypes
+    val accountTypes: LiveData<List<AccountType>> = incomeRepository.getAllAccountTypes()
 
-    init {
+    fun insertIncome(amount: Double?, date: Long, categoryId: Int, accountId: Int, note: String?) {
         viewModelScope.launch {
-            income = incomeRepository.getAllIncome()
-            _incomeCategories.value = incomeRepository.getAllIncomeCategories()
-            _accountTypes.value = incomeRepository.getAllAccountTypes()
-        }
-    }
-
-    fun insertIncome(amount: Double?, date: Long, categoryId: Int, accountId: Int, note: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            incomeRepository.insertIncome(amount, date, categoryId, accountId, note)
+            try {
+                if (amount != null && note != null) {
+                    val income = Income(
+                        date = date,
+                        amount = amount,
+                        incCategoryId = categoryId,
+                        accountId = accountId,
+                        note = note
+                    )
+                    incomeRepository.insertIncome(income)
+                    _incomeInsertState.postValue(Result.success(Unit))
+                } else {
+                    _incomeInsertState.postValue(Result.failure(IllegalArgumentException("Invalid input data")))
+                }
+            } catch (e: Exception) {
+                _incomeInsertState.postValue(Result.failure(e))
+            }
         }
     }
 
     fun insertIncomeCategories(incomeCategories: List<IncomeCategory>) {
         viewModelScope.launch(Dispatchers.IO) {
-            incomeRepository.insertIncomeCategories(incomeCategories)
+            try {
+                incomeRepository.insertIncomeCategories(incomeCategories)
+            } catch (_: Exception) {
+
+            }
         }
     }
 
     fun insertAccountTypes(accountTypes: List<AccountType>) {
         viewModelScope.launch(Dispatchers.IO) {
-            incomeRepository.insertAccountTypes(accountTypes)
+            try {
+                incomeRepository.insertAccountTypes(accountTypes)
+            } catch (_: Exception) {
+
+            }
         }
     }
 
     fun getIncomeByCategory(): Map<String, Double> {
         val categories = incomeCategories.value.orEmpty()
-        val incomeList = income?.value.orEmpty()
+        val incomeList = income.value.orEmpty()
 
         // Aggregate income amounts by category
         return incomeList.groupBy { incomeItem ->

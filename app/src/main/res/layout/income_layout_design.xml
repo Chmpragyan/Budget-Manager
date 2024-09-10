@@ -3,59 +3,47 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:padding="8dp">
+    android:layout_height="wrap_content">
 
     <TextView
         android:id="@+id/tv_display_date"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        tools:text="09.06.2024"
-        android:visibility="gone"
         android:textAlignment="center"
+        android:visibility="gone"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintWidth_percent="0.33" />
+        app:layout_constraintWidth_percent="0.33"
+        tools:text="09.06.2024" />
 
     <TextView
         android:id="@+id/tv_display_inc_date"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        tools:text="1000"
-        android:visibility="gone"
         android:textAlignment="center"
+        android:visibility="gone"
         app:layout_constraintStart_toEndOf="@id/tv_display_date"
         app:layout_constraintTop_toTopOf="@id/tv_display_date"
-        app:layout_constraintWidth_percent="0.33" />
+        app:layout_constraintWidth_percent="0.33"
+        tools:text="1000" />
 
     <TextView
         android:id="@+id/tv_display_exp_date"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        tools:text="500"
-        android:visibility="gone"
         android:textAlignment="center"
+        android:visibility="gone"
         app:layout_constraintStart_toEndOf="@+id/tv_display_inc_date"
         app:layout_constraintTop_toTopOf="@id/tv_display_date"
-        app:layout_constraintWidth_percent="0.33" />
+        app:layout_constraintWidth_percent="0.33"
+        tools:text="500" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/gl_guideline_date"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.6" />
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginVertical="8dp"
-        android:layout_weight="1"
-        android:background="@color/horizontal_line"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toBottomOf="@id/gl_guideline_date" />
+        app:layout_constraintGuide_percent="0.4" />
 
     <TextView
         android:id="@+id/tv_category"
@@ -67,11 +55,11 @@
         tools:text="Salary" />
 
     <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/gl_guideline"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/gl_guideline"
-        app:layout_constraintGuide_percent="0.15"
-        android:orientation="vertical"/>
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.15" />
 
     <TextView
         android:id="@+id/tv_note"
@@ -98,7 +86,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
-        android:textStyle="bold"
+        android:textColor="@color/button_pressed"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/tv_note"
         tools:text="Rs. 5000" />

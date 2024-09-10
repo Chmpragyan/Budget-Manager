@@ -1,5 +1,6 @@
 package com.example.budgetwise.dao
 
+import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
@@ -12,5 +13,5 @@ interface AccountTypeDao {
     suspend fun insertAccountTypes(accountTypes: List<AccountType>)
 
     @Query("SELECT * FROM account_table")
-    suspend fun getAllAccountTypes(): List<AccountType>
+    fun getAllAccountTypes(): LiveData<List<AccountType>>
 }

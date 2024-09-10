@@ -59,10 +59,10 @@ class StatsFragment : Fragment(), View.OnClickListener {
             updateIncomePieChart()
         }
 
-        expenseViewModel.expense?.observe(viewLifecycleOwner) {
+        expenseViewModel.expense.observe(viewLifecycleOwner) {
             updateExpensePieChart()
         }
-        expenseViewModel.expenseCategory?.observe(viewLifecycleOwner) {
+        expenseViewModel.expenseCategories.observe(viewLifecycleOwner) {
             updateExpensePieChart()
         }
     }
