@@ -25,8 +25,6 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import dagger.hilt.android.AndroidEntryPoint
 
-private const val TAG = "AddBudgetFragment"
-
 @AndroidEntryPoint
 class AddBudgetFragment : BottomSheetDialogFragment(), View.OnClickListener {
 
@@ -76,13 +74,11 @@ class AddBudgetFragment : BottomSheetDialogFragment(), View.OnClickListener {
 
         val currentDate = System.currentTimeMillis()
         val formattedDate = currentDate.formatDateTimeFromTimestamp()
-        Log.d("FormattedDate", "Formatted Date: $formattedDate")
         binding.incomeLayout.dateLayout.etDate.setText(formattedDate)
         date = currentDate
 
         val currentDateExp = System.currentTimeMillis()
         val formattedDateExp = currentDateExp.formatDateTimeFromTimestamp()
-        Log.d("FormattedDate", "Formatted Date: $formattedDateExp")
         binding.expenseLayout.dateLayout.etDate.setText(formattedDateExp)
         date = currentDate
     }
@@ -285,7 +281,6 @@ class AddBudgetFragment : BottomSheetDialogFragment(), View.OnClickListener {
                 Toast.makeText(requireContext(), "Income saved successfully!", Toast.LENGTH_SHORT)
                     .show()
             }.onFailure { exception ->
-                Log.e(TAG, "observeViewModel: Failed to save income $exception")
                 Toast.makeText(
                     requireContext(),
                     "Failed to save income: ${exception.localizedMessage}",
@@ -313,7 +308,6 @@ class AddBudgetFragment : BottomSheetDialogFragment(), View.OnClickListener {
                 Toast.makeText(requireContext(), "Expense saved successfully!", Toast.LENGTH_SHORT)
                     .show()
             }.onFailure { exception ->
-                Log.e(TAG, "observeViewModel: Failed to save expense $exception")
                 Toast.makeText(
                     requireContext(),
                     "Failed to save expense: ${exception.localizedMessage}",

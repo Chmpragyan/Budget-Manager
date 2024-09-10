@@ -11,31 +11,31 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
+        tools:text="09.06.2024"
         android:textAlignment="center"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintWidth_percent="0.33"
-        tools:text="09.06.2024" />
+        app:layout_constraintWidth_percent="0.33" />
 
     <TextView
         android:id="@+id/tv_display_income_date"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        tools:text="1000"
         android:textAlignment="center"
         app:layout_constraintStart_toEndOf="@id/tv_display_date"
         app:layout_constraintTop_toTopOf="@id/tv_display_date"
-        app:layout_constraintWidth_percent="0.33"
-        tools:text="1000" />
+        app:layout_constraintWidth_percent="0.33" />
 
     <TextView
         android:id="@+id/tv_display_expense_date"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        tools:text="500"
         android:textAlignment="center"
         app:layout_constraintStart_toEndOf="@+id/tv_display_income_date"
         app:layout_constraintTop_toTopOf="@id/tv_display_date"
-        app:layout_constraintWidth_percent="0.33"
-        tools:text="500" />
+        app:layout_constraintWidth_percent="0.33" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/gl_guideline_date"

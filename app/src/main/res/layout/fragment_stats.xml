@@ -1,17 +1,75 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".presentation.view.StatsFragment">
 
-    <com.github.mikephil.charting.charts.PieChart
-        android:id="@+id/pie_chart"
-        android:layout_width="300dp"
-        android:layout_height="300dp"
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/bn_chart_income"
+        android:layout_width="0dp"
+        android:layout_height="32dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/custom_button_selector"
+        android:text="@string/add_income"
+        android:textColor="@color/white"
+        app:layout_constraintEnd_toStartOf="@id/bn_chart_expense"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintWidth_percent="0.3" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/bn_chart_expense"
+        android:layout_width="0dp"
+        android:layout_height="32dp"
+        android:background="@drawable/custom_button_selector"
+        android:text="@string/add_expense"
+        android:textColor="@color/white"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/bn_chart_income"
+        app:layout_constraintTop_toTopOf="@id/bn_chart_income"
+        app:layout_constraintWidth_percent="0.3" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/gl_guideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.1" />
+
+    <FrameLayout
+        android:id="@+id/fl_income_layout_chart"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="visible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/gl_guideline">
+
+        <include
+            android:id="@+id/income_layout"
+            layout="@layout/income_chart_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/fl_expense_layout_chart"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/gl_guideline">
+
+        <include
+            android:id="@+id/expense_layout"
+            layout="@layout/expense_chart_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </FrameLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

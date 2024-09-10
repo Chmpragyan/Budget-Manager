@@ -52,4 +52,16 @@ class ExpenseViewModel @Inject constructor(private val expenseRepository: Expens
             expenseRepository.insertAccountTypes(accountTypes)
         }
     }
+
+    fun getExpenseByCategory(): Map<String, Double> {
+        val categories = expenseCategory?.value.orEmpty()
+        val expenseList = expense?.value.orEmpty()
+
+        // Aggregate income amounts by category
+        return expenseList.groupBy { expenseItem ->
+            categories.find { it.id == expenseItem.expCategoryId }?.name ?: "Unknown"
+        }.mapValues { (_, expenses) ->
+            expenses.sumOf { it.amount }
+        }
+    }
 }
