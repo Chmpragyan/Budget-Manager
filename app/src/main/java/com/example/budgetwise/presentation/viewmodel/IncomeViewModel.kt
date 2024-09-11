@@ -79,5 +79,39 @@ class IncomeViewModel @Inject constructor(private val incomeRepository: IncomeRe
             incomes.sumOf { it.amount }
         }
     }
+
+    fun deleteIncome(income: Income) {
+        viewModelScope.launch {
+            try {
+                incomeRepository.deleteIncome(income)
+            } catch (_: Exception) {
+
+            }
+        }
+    }
+
+    fun updateIncome(
+        id: Int?,
+        amount: Double?,
+        date: Long,
+        categoryId: Int,
+        accountId: Int,
+        note: String
+    ) {
+        viewModelScope.launch {
+            try {
+                incomeRepository.updateIncome(id!!, amount, date, categoryId, accountId, note)
+                _incomeInsertState.value = Result.success(Unit)
+            } catch (e: Exception) {
+                _incomeInsertState.value = Result.failure(e)
+            }
+        }
+    }
+
+    fun getIncomeById(incomeId: Int) {
+        viewModelScope.launch {
+            incomeRepository.getIncomeById(incomeId)
+        }
+    }
 }
 

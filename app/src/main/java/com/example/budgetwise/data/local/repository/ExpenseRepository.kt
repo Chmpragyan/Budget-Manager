@@ -7,6 +7,7 @@ import com.example.budgetwise.dao.ExpenseDao
 import com.example.budgetwise.data.local.model.AccountType
 import com.example.budgetwise.data.local.model.Expense
 import com.example.budgetwise.data.local.model.ExpenseCategory
+import com.example.budgetwise.data.local.model.Income
 import javax.inject.Inject
 
 class ExpenseRepository @Inject constructor(
@@ -52,5 +53,24 @@ class ExpenseRepository @Inject constructor(
 
     fun getAllAccountTypes(): LiveData<List<AccountType>> {
         return accountTypeDao.getAllAccountTypes()
+    }
+
+    suspend fun deleteExpense(expense: Expense) {
+        expenseDao.deleteExpense(expense)
+    }
+
+    suspend fun updateExpense(
+        id: Int,
+        amount: Double?,
+        date: Long,
+        categoryId: Int,
+        accountId: Int,
+        note: String
+    ) {
+        expenseDao.updateExpense(id, amount, date, categoryId, accountId, note)
+    }
+
+    suspend fun getExpenseById(expenseId: Int): Expense? {
+        return expenseDao.getExpenseById(expenseId)
     }
 }

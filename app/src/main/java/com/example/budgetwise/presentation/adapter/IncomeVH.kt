@@ -2,14 +2,16 @@ package com.example.budgetwise.presentation.adapter
 
 import android.view.View
 import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
+import com.example.budgetwise.interfaces.ISelectList
 import com.example.budgetwise.data.local.model.Income
 import com.example.budgetwise.databinding.IncomeLayoutDesignBinding
 import com.example.budgetwise.extensions.formatDate
 
 private const val TAG = "IncomeVH"
 
-class IncomeVH(binding: IncomeLayoutDesignBinding) : RecyclerView.ViewHolder(binding.root) {
+class IncomeVH(binding: IncomeLayoutDesignBinding, private var iSelectList: ISelectList) : RecyclerView.ViewHolder(binding.root) {
     private val incomeCategory: TextView = binding.tvCategory
     private val incomeNote: TextView = binding.tvNote
     private val incomeAccount: TextView = binding.tvAccountType
@@ -17,6 +19,8 @@ class IncomeVH(binding: IncomeLayoutDesignBinding) : RecyclerView.ViewHolder(bin
     private val displayDate: TextView = binding.tvDisplayDate
     private val displayDailyIncome: TextView = binding.tvDisplayIncDate
     private val displayDailyExpense: TextView = binding.tvDisplayExpDate
+
+    private val incomeLayout: ConstraintLayout = binding.clIncomeLayout
 
     fun onBind(
         income: Income,
@@ -48,5 +52,6 @@ class IncomeVH(binding: IncomeLayoutDesignBinding) : RecyclerView.ViewHolder(bin
         incomeAccount.text = accountTypeMapById[income.accountId] ?: "Unknown"
         incomeNote.text = income.note
         incomeAmount.text = income.amount.toString()
+
     }
 }

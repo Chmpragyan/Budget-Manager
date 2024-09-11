@@ -11,9 +11,11 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.Navigation
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -24,6 +26,8 @@ import com.example.budgetwise.data.local.model.ExpenseCategory
 import com.example.budgetwise.data.local.model.Income
 import com.example.budgetwise.data.local.model.IncomeCategory
 import com.example.budgetwise.databinding.FragmentHomeBinding
+import com.example.budgetwise.extensions.formatDate
+import com.example.budgetwise.interfaces.ISelectList
 import com.example.budgetwise.presentation.adapter.BudgetAdapter
 import com.example.budgetwise.presentation.viewmodel.ExpenseViewModel
 import com.example.budgetwise.presentation.viewmodel.IncomeViewModel
@@ -32,7 +36,7 @@ import dagger.hilt.android.AndroidEntryPoint
 private const val TAG = "HomeFragment"
 
 @AndroidEntryPoint
-class HomeFragment : Fragment(), View.OnClickListener {
+class HomeFragment : Fragment(), View.OnClickListener, ISelectList {
 
     private lateinit var binding: FragmentHomeBinding
 
@@ -84,7 +88,6 @@ class HomeFragment : Fragment(), View.OnClickListener {
 
         setRecyclerView()
 
-
         incomeViewModel.income.observe(viewLifecycleOwner) { list ->
             list?.let {
                 Log.d(TAG, "Income data received: $it")
@@ -92,7 +95,7 @@ class HomeFragment : Fragment(), View.OnClickListener {
                 incomeList.addAll(it)
                 budgetAdapter.notifyDataSetChanged()
                 updateBudgetTotals()
-                swipeToDelFeatures()
+                swipeToDelUpdateFeatures()
             }
         }
 
@@ -103,7 +106,7 @@ class HomeFragment : Fragment(), View.OnClickListener {
                 expenseList.addAll(it)
                 budgetAdapter.notifyDataSetChanged()
                 updateBudgetTotals()
-                swipeToDelFeatures()
+                swipeToDelUpdateFeatures()
             }
         }
     }
@@ -127,14 +130,8 @@ class HomeFragment : Fragment(), View.OnClickListener {
     override fun onClick(view: View?) {
         when (view?.id) {
             R.id.fb_floating_button -> {
-                val existingFragment =
-                    parentFragmentManager.findFragmentByTag("AddBudgetBottomSheet")
-                if (existingFragment == null) {
-                    val bottomSheet = AddBudgetFragment()
-                    bottomSheet.show(parentFragmentManager, "AddBudgetBottomSheet")
-                } else {
-                    (existingFragment as? AddBudgetFragment)?.dismiss()
-                }
+                val action = HomeFragmentDirections.actionHomeFragmentToAddBudget(null, null)
+                Navigation.findNavController(requireView()).navigate(action)
             }
         }
     }
@@ -143,47 +140,77 @@ class HomeFragment : Fragment(), View.OnClickListener {
         incomeList = ArrayList()
         expenseList = ArrayList()
         budgetAdapter =
-            BudgetAdapter(expenseList, incomeList, incomeCatList, expenseCategory, accountType)
+            BudgetAdapter(
+                incomeList,
+                expenseList,
+                incomeCatList,
+                expenseCategory,
+                accountType,
+                this,
+                requireContext()
+            )
         binding.rvRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         binding.rvRecyclerView.setHasFixedSize(true)
         binding.rvRecyclerView.adapter = budgetAdapter
     }
 
-    private fun swipeToDelFeatures() {
+    private fun swipeToDelUpdateFeatures() {
         val recyclerList = binding.rvRecyclerView
         val adapter =
-            BudgetAdapter(expenseList, incomeList, incomeCatList, expenseCategory, accountType)
+            BudgetAdapter(
+                incomeList,
+                expenseList,
+                incomeCatList,
+                expenseCategory,
+                accountType,
+                this,
+                requireContext()
+            )
         recyclerList.adapter = adapter
 
         swipeHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(
-            0,
-            ItemTouchHelper.LEFT
+            ItemTouchHelper.LEFT,
+            ItemTouchHelper.LEFT,
         ) {
             override fun onMove(
                 recyclerView: RecyclerView,
                 viewHolder: RecyclerView.ViewHolder,
                 target: RecyclerView.ViewHolder
             ): Boolean {
-                return true
+                return false
             }
 
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                 val pos = viewHolder.adapterPosition
-                val builder = AlertDialog.Builder(requireContext())
-                builder.setMessage("Are you sure you want to delete this?")
-                builder.setPositiveButton("Yes") { dialog, _ ->
-                    incomeList.removeAt(pos)
-                    expenseList.removeAt(pos)
-                    adapter.notifyItemRemoved(pos)
-                    dialog.dismiss()
-                }
 
-                builder.setNegativeButton("No") { dialog, _ ->
-                    adapter.notifyItemChanged(pos)
-                    dialog.cancel()
+                val isIncomeItem = pos < incomeList.size
+                val item = if (isIncomeItem) incomeList[pos] else expenseList[pos - incomeList.size]
+
+                when (direction) {
+                    ItemTouchHelper.LEFT -> {
+                        val builder = AlertDialog.Builder(requireContext())
+                        builder.setMessage("Are you sure you want to delete this?")
+                        builder.setPositiveButton("Yes") { dialog, _ ->
+                            if (isIncomeItem) {
+                                incomeViewModel.deleteIncome(item as Income)
+                                incomeList.remove(item)
+                            } else {
+                                expenseViewModel.deleteExpense(item as Expense)
+                                expenseList.remove(item)
+                            }
+                            adapter.notifyItemRemoved(pos)
+                            dialog.dismiss()
+                        }
+
+                        builder.setNegativeButton("No") { dialog, _ ->
+                            adapter.notifyItemChanged(pos)
+                            dialog.dismiss()
+                        }
+
+                        val alertDialog = builder.create()
+                        alertDialog.show()
+                    }
                 }
-                val alertDialog = builder.create()
-                alertDialog.show()
             }
 
             override fun onChildDraw(
@@ -195,33 +222,40 @@ class HomeFragment : Fragment(), View.OnClickListener {
                 actionState: Int,
                 isCurrentlyActive: Boolean
             ) {
+                val itemView = viewHolder.itemView
+                val p = Paint()
 
                 if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
-                    val itemView = viewHolder.itemView
-                    val p = Paint()
-                    if (dX < 0) {
-                        p.color = Color.RED
-                        val background = RectF(
-                            itemView.right.toFloat() + dX,
-                            itemView.top.toFloat(),
-                            itemView.right.toFloat(),
-                            itemView.bottom.toFloat()
-                        )
+                    when {
+                        dX < 0 -> {
+                            p.color = Color.RED
+                            val background = RectF(
+                                itemView.right.toFloat() + dX,
+                                itemView.top.toFloat(),
+                                itemView.right.toFloat(),
+                                itemView.bottom.toFloat()
+                            )
 
-                        val cornerRadius = 20f
-                        val path = Path().apply {
-                            addRoundRect(background, cornerRadius, cornerRadius, Path.Direction.CW)
+                            val cornerRadius = 20f
+                            val path = Path().apply {
+                                addRoundRect(
+                                    background,
+                                    cornerRadius,
+                                    cornerRadius,
+                                    Path.Direction.CW
+                                )
+                            }
+
+                            c.drawPath(path, p)
+                            p.color = Color.WHITE
+                            p.textSize = 40f
+                            p.textAlign = Paint.Align.CENTER
+
+                            val textX = background.centerX()
+                            val textY = background.centerY() - ((p.descent() + p.ascent()) / 2)
+
+                            c.drawText("DELETE", textX, textY, p)
                         }
-
-                        c.drawPath(path, p)
-                        p.color = Color.WHITE
-                        p.textSize = 40f
-                        p.textAlign = Paint.Align.CENTER
-
-                        val textX = background.centerX()
-                        val textY = background.centerY() - ((p.descent() + p.ascent()) / 2)
-
-                        c.drawText("DELETE", textX, textY, p)
                     }
                 } else {
                     c.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
@@ -237,8 +271,18 @@ class HomeFragment : Fragment(), View.OnClickListener {
                     isCurrentlyActive
                 )
             }
-
         })
         swipeHelper.attachToRecyclerView(recyclerList)
     }
+
+    override fun onSelectItemListIncome(income: Income) {
+        val action = HomeFragmentDirections.actionHomeFragmentToAddBudget(income, null)
+        Navigation.findNavController(requireView()).navigate(action)
+    }
+
+    override fun onSelectItemListExpense(expense: Expense) {
+        val action = HomeFragmentDirections.actionHomeFragmentToAddBudget(null, expense)
+        Navigation.findNavController(requireView()).navigate(action)
+    }
+
 }

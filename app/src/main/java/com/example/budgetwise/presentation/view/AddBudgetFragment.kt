@@ -12,12 +12,18 @@ import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.appcompat.widget.AppCompatButton
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.Navigation
+import androidx.navigation.Navigation.findNavController
+import androidx.navigation.fragment.navArgs
 import com.example.budgetwise.R
 import com.example.budgetwise.data.local.model.AccountType
+import com.example.budgetwise.data.local.model.Expense
 import com.example.budgetwise.data.local.model.ExpenseCategory
+import com.example.budgetwise.data.local.model.Income
 import com.example.budgetwise.data.local.model.IncomeCategory
 import com.example.budgetwise.databinding.FragmentAddBudgetBinding
 import com.example.budgetwise.extensions.formatDateTimeFromTimestamp
+import com.example.budgetwise.presentation.view.AddBudgetFragmentArgs
 import com.example.budgetwise.presentation.viewmodel.ExpenseViewModel
 import com.example.budgetwise.presentation.viewmodel.IncomeViewModel
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -31,11 +37,14 @@ class AddBudgetFragment : BottomSheetDialogFragment(), View.OnClickListener {
     private val incomeViewModel: IncomeViewModel by activityViewModels()
     private val expenseViewModel: ExpenseViewModel by activityViewModels()
     private var date: Long = 0
+    private var editId: Int? = null
     private val accountTypes = listOf(
         AccountType(name = "Cash"),
         AccountType(name = "Accounts"),
         AccountType(name = "Card")
     )
+
+    private val args: AddBudgetFragmentArgs by navArgs()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -46,12 +55,13 @@ class AddBudgetFragment : BottomSheetDialogFragment(), View.OnClickListener {
         binding.toolbar.setNavigationOnClickListener {
             dismiss()
         }
-
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        getData()
 
         observeViewModel()
 
@@ -59,13 +69,13 @@ class AddBudgetFragment : BottomSheetDialogFragment(), View.OnClickListener {
 
         displayBottomSheet()
 
-        handleButtonClick(
-            selectedButton = binding.addIncomeBtn,
-            deselectedButtons = listOf(binding.addExpenseBtn, binding.addTransferBtn),
-            titleResId = R.string.add_income,
-            visibleLayout = binding.flIncomeLayout,
-            hiddenLayouts = listOf(binding.flExpenseLayout, binding.flTransferLayout)
-        )
+//        handleButtonClick(
+//            selectedButton = binding.addExpenseBtn,
+//            deselectedButtons = listOf(binding.addIncomeBtn, binding.addTransferBtn),
+//            titleResId = R.string.add_expense,
+//            visibleLayout = binding.flExpenseLayout,
+//            hiddenLayouts = listOf(binding.flIncomeLayout, binding.flTransferLayout)
+//        )
 
         initializeButtonClick()
 
@@ -80,6 +90,31 @@ class AddBudgetFragment : BottomSheetDialogFragment(), View.OnClickListener {
         val formattedDateExp = currentDateExp.formatDateTimeFromTimestamp()
         binding.expenseLayout.dateLayout.etDate.setText(formattedDateExp)
         date = currentDate
+    }
+
+    private fun getData() {
+        val incomeModel = args.income
+        val expenseModel = args.expense
+
+        if (incomeModel != null) {
+            handleButtonClick(
+                selectedButton = binding.addIncomeBtn,
+                deselectedButtons = listOf(binding.addExpenseBtn, binding.addTransferBtn),
+                titleResId = R.string.add_income,
+                visibleLayout = binding.flIncomeLayout,
+                hiddenLayouts = listOf(binding.flExpenseLayout, binding.flTransferLayout)
+            )
+            populateIncomeFields(incomeModel)
+        } else if (expenseModel != null) {
+            handleButtonClick(
+                selectedButton = binding.addExpenseBtn,
+                deselectedButtons = listOf(binding.addIncomeBtn, binding.addTransferBtn),
+                titleResId = R.string.add_expense,
+                visibleLayout = binding.flExpenseLayout,
+                hiddenLayouts = listOf(binding.flIncomeLayout, binding.flTransferLayout)
+            )
+            populateExpenseFields(expenseModel)
+        }
     }
 
     private fun initializeButtonClick() {
@@ -215,15 +250,6 @@ class AddBudgetFragment : BottomSheetDialogFragment(), View.OnClickListener {
     )
 
     private fun saveIncome() {
-        val categories = listOf(
-            IncomeCategory(name = "Salary"),
-            IncomeCategory(name = "Bonus"),
-            IncomeCategory(name = "Other")
-        )
-        incomeViewModel.insertIncomeCategories(categories)
-
-        incomeViewModel.insertAccountTypes(accountTypes)
-
         val amount = binding.incomeLayout.amountLayout.etAmount.text.toString().toDoubleOrNull()
         val categoryName = binding.incomeLayout.autoCompleteTextView.text.toString()
         val categoryId = incomeCategoryMap[categoryName] ?: return showError("Invalid category")
@@ -231,22 +257,28 @@ class AddBudgetFragment : BottomSheetDialogFragment(), View.OnClickListener {
         val accountId = accountTypeMap[accountName] ?: return showError("Invalid account")
         val note = binding.incomeLayout.noteLayout.etNote.text.toString()
 
-        incomeViewModel.insertIncome(amount, date, categoryId, accountId, note)
+        if (editId != null) {
+            incomeViewModel.updateIncome(editId, amount, date, categoryId, accountId, note)
+            Toast.makeText(
+                requireContext(),
+                "Income updated successfully!",
+                Toast.LENGTH_SHORT
+            )
+                .show()
+        } else {
+            val categories = listOf(
+                IncomeCategory(name = "Salary"),
+                IncomeCategory(name = "Bonus"),
+                IncomeCategory(name = "Other")
+            )
+            incomeViewModel.insertIncomeCategories(categories)
+            incomeViewModel.insertAccountTypes(accountTypes)
+
+            incomeViewModel.insertIncome(amount, date, categoryId, accountId, note)
+        }
     }
 
     private fun saveExpense() {
-        val categories = listOf(
-            ExpenseCategory(name = "Food"),
-            ExpenseCategory(name = "Clothing"),
-            ExpenseCategory(name = "Education"),
-            ExpenseCategory(name = "Health"),
-            ExpenseCategory(name = "Entertainment"),
-            ExpenseCategory(name = "Travel")
-        )
-        expenseViewModel.insertExpenseCategories(categories)
-
-        expenseViewModel.insertAccountTypes(accountTypes)
-
         val amount = binding.expenseLayout.amountLayout.etAmount.text.toString().toDoubleOrNull()
         val categoryName = binding.expenseLayout.autoCompleteTextView.text.toString()
         val categoryId = expenseCategoryMap[categoryName] ?: return showError("Invalid category")
@@ -254,7 +286,29 @@ class AddBudgetFragment : BottomSheetDialogFragment(), View.OnClickListener {
         val accountId = accountTypeMap[accountName] ?: return showError("Invalid account")
         val note = binding.expenseLayout.noteLayout.etNote.text.toString()
 
-        expenseViewModel.insertExpense(amount, date, categoryId, accountId, note)
+        if (editId != null) {
+            expenseViewModel.updateExpense(editId!!, amount, date, categoryId, accountId, note)
+            Toast.makeText(
+                requireContext(),
+                "Expense updated successfully!",
+                Toast.LENGTH_SHORT
+            )
+                .show()
+        } else {
+            val categories = listOf(
+                ExpenseCategory(name = "Food"),
+                ExpenseCategory(name = "Clothing"),
+                ExpenseCategory(name = "Education"),
+                ExpenseCategory(name = "Health"),
+                ExpenseCategory(name = "Entertainment"),
+                ExpenseCategory(name = "Travel")
+            )
+            expenseViewModel.insertExpenseCategories(categories)
+
+            expenseViewModel.insertAccountTypes(accountTypes)
+
+            expenseViewModel.insertExpense(amount, date, categoryId, accountId, note)
+        }
     }
 
     private fun showError(message: String) {
@@ -270,15 +324,20 @@ class AddBudgetFragment : BottomSheetDialogFragment(), View.OnClickListener {
 
         incomeViewModel.incomeInsertState.observe(viewLifecycleOwner) { result ->
             result.onSuccess {
-                clearInputFields(
-                    binding.incomeLayout.amountLayout.etAmount,
-                    binding.incomeLayout.autoCompleteTextView,
-                    binding.incomeLayout.accountCategory,
-                    binding.incomeLayout.noteLayout.etNote
-                )
-
-                Toast.makeText(requireContext(), "Income saved successfully!", Toast.LENGTH_SHORT)
-                    .show()
+                if (editId == null) {
+                    clearInputFields(
+                        binding.incomeLayout.amountLayout.etAmount,
+                        binding.incomeLayout.autoCompleteTextView,
+                        binding.incomeLayout.accountCategory,
+                        binding.incomeLayout.noteLayout.etNote
+                    )
+                    Toast.makeText(
+                        requireContext(),
+                        "Income saved successfully!",
+                        Toast.LENGTH_SHORT
+                    )
+                        .show()
+                }
             }.onFailure { exception ->
                 Toast.makeText(
                     requireContext(),
@@ -298,14 +357,20 @@ class AddBudgetFragment : BottomSheetDialogFragment(), View.OnClickListener {
 
         expenseViewModel.expenseInsertState.observe(viewLifecycleOwner) { result ->
             result.onSuccess {
-                clearInputFields(
-                    binding.expenseLayout.amountLayout.etAmount,
-                    binding.expenseLayout.autoCompleteTextView,
-                    binding.expenseLayout.accountCategory,
-                    binding.expenseLayout.noteLayout.etNote
-                )
-                Toast.makeText(requireContext(), "Expense saved successfully!", Toast.LENGTH_SHORT)
-                    .show()
+                if (editId == null) {
+                    clearInputFields(
+                        binding.expenseLayout.amountLayout.etAmount,
+                        binding.expenseLayout.autoCompleteTextView,
+                        binding.expenseLayout.accountCategory,
+                        binding.expenseLayout.noteLayout.etNote
+                    )
+                    Toast.makeText(
+                        requireContext(),
+                        "Expense saved successfully!",
+                        Toast.LENGTH_SHORT
+                    )
+                        .show()
+                }
             }.onFailure { exception ->
                 Toast.makeText(
                     requireContext(),
@@ -315,6 +380,33 @@ class AddBudgetFragment : BottomSheetDialogFragment(), View.OnClickListener {
             }
         }
     }
+
+    private fun populateIncomeFields(income: Income) {
+        binding.incomeLayout.amountLayout.etAmount.setText(income.amount.toString())
+        binding.incomeLayout.autoCompleteTextView.setText(getCategoryName(income.incCategoryId.toString()))
+        binding.incomeLayout.accountCategory.setText(getAccountName(income.accountId.toString()))
+        binding.incomeLayout.noteLayout.etNote.setText(income.note)
+        date = income.date
+        editId = income.id
+    }
+
+    private fun populateExpenseFields(expense: Expense) {
+        binding.expenseLayout.amountLayout.etAmount.setText(expense.amount.toString())
+        binding.expenseLayout.autoCompleteTextView.setText(getCategoryName(expense.expCategoryId.toString()))
+        binding.expenseLayout.accountCategory.setText(getAccountName(expense.accountId.toString()))
+        binding.expenseLayout.noteLayout.etNote.setText(expense.note)
+        date = expense.date
+        editId = expense.id
+    }
+
+    private fun getCategoryName(categoryId: String): String {
+        return (incomeCategoryMap[categoryId] ?: "Unknown").toString()
+    }
+
+    private fun getAccountName(accountId: String): String {
+        return (accountTypeMap[accountId] ?: "Unknown").toString()
+    }
+
 
     private fun clearInputFields(
         amountEditText: EditText,

@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.budgetwise.data.local.model.AccountType
 import com.example.budgetwise.data.local.model.Expense
 import com.example.budgetwise.data.local.model.ExpenseCategory
+import com.example.budgetwise.data.local.model.Income
 import com.example.budgetwise.data.local.repository.ExpenseRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -77,6 +78,40 @@ class ExpenseViewModel @Inject constructor(private val expenseRepository: Expens
             categories.find { it.id == expenseItem.expCategoryId }?.name ?: "Unknown"
         }.mapValues { (_, expenses) ->
             expenses.sumOf { it.amount }
+        }
+    }
+
+    fun deleteExpense(expense: Expense) {
+        viewModelScope.launch {
+            try {
+                expenseRepository.deleteExpense(expense)
+            } catch (_: Exception) {
+
+            }
+        }
+    }
+
+    fun updateExpense(
+        id: Int,
+        amount: Double?,
+        date: Long,
+        categoryId: Int,
+        accountId: Int,
+        note: String
+    ) {
+        viewModelScope.launch {
+            try {
+                expenseRepository.updateExpense(id, amount, date, categoryId, accountId, note)
+                _expenseInsertState.value = Result.success(Unit)
+            } catch (e: Exception) {
+                _expenseInsertState.value = Result.failure(e)
+            }
+        }
+    }
+
+    fun getExpenseById(expenseId: Int) {
+        viewModelScope.launch {
+            expenseRepository.getExpenseById(expenseId)
         }
     }
 }

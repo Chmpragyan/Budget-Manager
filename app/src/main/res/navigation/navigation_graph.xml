@@ -36,6 +36,19 @@
         android:id="@+id/add_budget"
         android:name="com.example.budgetwise.presentation.view.AddBudgetFragment"
         android:label="fragment_add_budget"
-        tools:layout="@layout/fragment_add_budget" />
+        tools:layout="@layout/fragment_add_budget">
+        <argument
+            android:name="income"
+            app:argType="com.example.budgetwise.data.local.model.Income"
+            app:nullable="true"/>
+
+        <argument
+            android:name="expense"
+            app:argType="com.example.budgetwise.data.local.model.Expense"
+            app:nullable="true"/>
+        <action
+            android:id="@+id/action_add_budget_to_home_fragment"
+            app:destination="@id/home_fragment" />
+    </dialog>
 
 </navigation>

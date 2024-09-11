@@ -2,7 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/cl_income_layout"
+    android:id="@+id/cl_budget_layout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
@@ -10,6 +10,7 @@
         android:id="@+id/tv_display_date"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
         android:textAlignment="center"
         android:visibility="gone"
         app:layout_constraintStart_toStartOf="parent"
@@ -18,7 +19,7 @@
         tools:text="09.06.2024" />
 
     <TextView
-        android:id="@+id/tv_display_inc_date"
+        android:id="@+id/tv_display_income"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:textAlignment="center"
@@ -29,12 +30,12 @@
         tools:text="1000" />
 
     <TextView
-        android:id="@+id/tv_display_exp_date"
+        android:id="@+id/tv_display_expense"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:textAlignment="center"
         android:visibility="gone"
-        app:layout_constraintStart_toEndOf="@+id/tv_display_inc_date"
+        app:layout_constraintStart_toEndOf="@+id/tv_display_income"
         app:layout_constraintTop_toTopOf="@id/tv_display_date"
         app:layout_constraintWidth_percent="0.33"
         tools:text="500" />
@@ -44,7 +45,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.4" />
+        app:layout_constraintGuide_percent="0.5" />
 
     <TextView
         android:id="@+id/tv_category"
@@ -87,7 +88,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
-        android:textColor="@color/button_pressed"
+        android:textColor="@color/red"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/tv_note"
         tools:text="Rs. 5000" />

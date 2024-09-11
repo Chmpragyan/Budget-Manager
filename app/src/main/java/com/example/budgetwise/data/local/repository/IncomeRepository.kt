@@ -55,5 +55,24 @@ class IncomeRepository @Inject constructor(
     fun getAllAccountTypes(): LiveData<List<AccountType>> {
         return accountTypeDao.getAllAccountTypes()
     }
+
+    suspend fun deleteIncome(income: Income) {
+        incomeDao.deleteIncome(income)
+    }
+
+    suspend fun updateIncome(
+        id: Int,
+        amount: Double?,
+        date: Long,
+        categoryId: Int,
+        accountId: Int,
+        note: String
+    ) {
+        incomeDao.updateIncome(id, amount, date, categoryId, accountId, note)
+    }
+
+    suspend fun getIncomeById(incomeId: Int): Income? {
+        return incomeDao.getIncomeById(incomeId)
+    }
 }
 
