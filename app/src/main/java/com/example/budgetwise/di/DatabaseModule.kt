@@ -24,7 +24,6 @@ object DatabaseModule {
 
     private val MIGRATION_3_4 = object : Migration(3, 4) {
         override fun migrate(db: SupportSQLiteDatabase) {
-            // Step 1: Create a new table with the correct schema, ensuring the 'id' column is NOT NULL
             db.execSQL(
                 """
             CREATE TABLE expense_table_new (
@@ -40,7 +39,6 @@ object DatabaseModule {
             """.trimIndent()
             )
 
-            // Step 2: Copy data from the old table to the new table
             db.execSQL(
                 """
             INSERT INTO expense_table_new (id, date, amount, expCategoryId, accountId, note)
@@ -49,10 +47,8 @@ object DatabaseModule {
             """.trimIndent()
             )
 
-            // Step 3: Drop the old table
             db.execSQL("DROP TABLE expense_table")
 
-            // Step 4: Rename the new table to the original table name
             db.execSQL("ALTER TABLE expense_table_new RENAME TO expense_table")
         }
     }

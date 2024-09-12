@@ -17,30 +17,28 @@ class IncomeRepository @Inject constructor(
     private val accountTypeDao: AccountTypeDao
 ) {
 
-    suspend fun insertIncome(income: Income): Result<Unit> {
-        return try {
+    suspend fun insertIncome(income: Income) {
+        withContext(Dispatchers.IO) {
             incomeDao.insertIncome(income)
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Result.failure(e)
         }
     }
 
-    suspend fun insertIncomeCategories(incomeCategories: List<IncomeCategory>): Result<Unit> {
-        return try {
-            incomeCategoryDao.insertIncomeCategories(incomeCategories)
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Result.failure(e)
+    suspend fun updateIncome(
+        id: Int,
+        amount: Double?,
+        date: Long,
+        categoryId: Int,
+        accountId: Int,
+        note: String
+    ) {
+        withContext(Dispatchers.IO) {
+            incomeDao.updateIncome(id, amount, date, categoryId, accountId, note)
         }
     }
 
-    suspend fun insertAccountTypes(accountTypes: List<AccountType>): Result<Unit> {
-        return try {
-            accountTypeDao.insertAccountTypes(accountTypes)
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Result.failure(e)
+    suspend fun deleteIncome(income: Income) {
+        withContext(Dispatchers.IO) {
+            incomeDao.deleteIncome(income)
         }
     }
 
@@ -56,23 +54,19 @@ class IncomeRepository @Inject constructor(
         return accountTypeDao.getAllAccountTypes()
     }
 
-    suspend fun deleteIncome(income: Income) {
-        incomeDao.deleteIncome(income)
+    suspend fun insertIncomeCategories(incomeCategories: List<IncomeCategory>) {
+        withContext(Dispatchers.IO) {
+            incomeCategoryDao.insertIncomeCategories(incomeCategories)
+        }
     }
 
-    suspend fun updateIncome(
-        id: Int,
-        amount: Double?,
-        date: Long,
-        categoryId: Int,
-        accountId: Int,
-        note: String
-    ) {
-        incomeDao.updateIncome(id, amount, date, categoryId, accountId, note)
+    suspend fun insertAccountTypes(accountTypes: List<AccountType>) {
+        withContext(Dispatchers.IO) {
+            accountTypeDao.insertAccountTypes(accountTypes)
+        }
     }
 
     suspend fun getIncomeById(incomeId: Int): Income? {
         return incomeDao.getIncomeById(incomeId)
     }
 }
-

@@ -12,8 +12,8 @@ import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.appcompat.widget.AppCompatButton
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.Navigation
-import androidx.navigation.Navigation.findNavController
 import androidx.navigation.fragment.navArgs
 import com.example.budgetwise.R
 import com.example.budgetwise.data.local.model.AccountType
@@ -24,11 +24,15 @@ import com.example.budgetwise.data.local.model.IncomeCategory
 import com.example.budgetwise.databinding.FragmentAddBudgetBinding
 import com.example.budgetwise.extensions.formatDateTimeFromTimestamp
 import com.example.budgetwise.presentation.view.AddBudgetFragmentArgs
+import com.example.budgetwise.presentation.viewmodel.ExpenseEvent
 import com.example.budgetwise.presentation.viewmodel.ExpenseViewModel
+import com.example.budgetwise.presentation.viewmodel.IncomeEvent
 import com.example.budgetwise.presentation.viewmodel.IncomeViewModel
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class AddBudgetFragment : BottomSheetDialogFragment(), View.OnClickListener {
@@ -63,19 +67,11 @@ class AddBudgetFragment : BottomSheetDialogFragment(), View.OnClickListener {
 
         getData()
 
-        observeViewModel()
+        observeViewModelIncome()
 
         observeViewModelExpense()
 
         displayBottomSheet()
-
-//        handleButtonClick(
-//            selectedButton = binding.addExpenseBtn,
-//            deselectedButtons = listOf(binding.addIncomeBtn, binding.addTransferBtn),
-//            titleResId = R.string.add_expense,
-//            visibleLayout = binding.flExpenseLayout,
-//            hiddenLayouts = listOf(binding.flIncomeLayout, binding.flTransferLayout)
-//        )
 
         initializeButtonClick()
 
@@ -257,14 +253,13 @@ class AddBudgetFragment : BottomSheetDialogFragment(), View.OnClickListener {
         val accountId = accountTypeMap[accountName] ?: return showError("Invalid account")
         val note = binding.incomeLayout.noteLayout.etNote.text.toString()
 
+        if (amount == null) {
+            showError("Invalid amount")
+            return
+        }
+
         if (editId != null) {
-            incomeViewModel.updateIncome(editId, amount, date, categoryId, accountId, note)
-            Toast.makeText(
-                requireContext(),
-                "Income updated successfully!",
-                Toast.LENGTH_SHORT
-            )
-                .show()
+            incomeViewModel.updateIncome(editId!!, amount, date, categoryId, accountId, note)
         } else {
             val categories = listOf(
                 IncomeCategory(name = "Salary"),
@@ -274,7 +269,15 @@ class AddBudgetFragment : BottomSheetDialogFragment(), View.OnClickListener {
             incomeViewModel.insertIncomeCategories(categories)
             incomeViewModel.insertAccountTypes(accountTypes)
 
-            incomeViewModel.insertIncome(amount, date, categoryId, accountId, note)
+            incomeViewModel.insertIncome(
+                Income(
+                    amount = amount,
+                    date = date,
+                    incCategoryId = categoryId,
+                    accountId = accountId,
+                    note = note
+                )
+            )
         }
     }
 
@@ -286,14 +289,13 @@ class AddBudgetFragment : BottomSheetDialogFragment(), View.OnClickListener {
         val accountId = accountTypeMap[accountName] ?: return showError("Invalid account")
         val note = binding.expenseLayout.noteLayout.etNote.text.toString()
 
+        if (amount == null) {
+            showError("Invalid amount")
+            return
+        }
+
         if (editId != null) {
             expenseViewModel.updateExpense(editId!!, amount, date, categoryId, accountId, note)
-            Toast.makeText(
-                requireContext(),
-                "Expense updated successfully!",
-                Toast.LENGTH_SHORT
-            )
-                .show()
         } else {
             val categories = listOf(
                 ExpenseCategory(name = "Food"),
@@ -304,10 +306,17 @@ class AddBudgetFragment : BottomSheetDialogFragment(), View.OnClickListener {
                 ExpenseCategory(name = "Travel")
             )
             expenseViewModel.insertExpenseCategories(categories)
-
             expenseViewModel.insertAccountTypes(accountTypes)
 
-            expenseViewModel.insertExpense(amount, date, categoryId, accountId, note)
+            expenseViewModel.insertExpense(
+                Expense(
+                    amount = amount,
+                    date = date,
+                    expCategoryId = categoryId,
+                    accountId = accountId,
+                    note = note
+                )
+            )
         }
     }
 
@@ -315,71 +324,87 @@ class AddBudgetFragment : BottomSheetDialogFragment(), View.OnClickListener {
         Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
     }
 
-    private fun observeViewModel() {
-        incomeViewModel.incomeCategories.observe(viewLifecycleOwner) {
-        }
+    private fun observeViewModelIncome() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            incomeViewModel.incomeEvent.collectLatest { event ->
+                when (event) {
+                    is IncomeEvent.Success -> {
+                        if (editId == null) {
+                            clearInputFields(
+                                binding.incomeLayout.amountLayout.etAmount,
+                                binding.incomeLayout.autoCompleteTextView,
+                                binding.incomeLayout.accountCategory,
+                                binding.incomeLayout.noteLayout.etNote
+                            )
+                            Toast.makeText(requireContext(), event.message, Toast.LENGTH_SHORT)
+                                .show()
+                        } else {
+                            Toast.makeText(requireContext(), event.message, Toast.LENGTH_SHORT)
+                                .show()
+                        }
+                        val navController = Navigation.findNavController(requireActivity(), R.id.fragment_container_view)
+                        val action = AddBudgetFragmentDirections.actionAddBudgetToHomeFragment()
+                        navController.navigate(action)
 
-        incomeViewModel.accountTypes.observe(viewLifecycleOwner) {
-        }
+                        // Close the DialogFragment after navigating
+                        dismiss()
+                    }
 
-        incomeViewModel.incomeInsertState.observe(viewLifecycleOwner) { result ->
-            result.onSuccess {
-                if (editId == null) {
-                    clearInputFields(
-                        binding.incomeLayout.amountLayout.etAmount,
-                        binding.incomeLayout.autoCompleteTextView,
-                        binding.incomeLayout.accountCategory,
-                        binding.incomeLayout.noteLayout.etNote
-                    )
-                    Toast.makeText(
-                        requireContext(),
-                        "Income saved successfully!",
-                        Toast.LENGTH_SHORT
-                    )
-                        .show()
+                    is IncomeEvent.Failure -> {
+                        Toast.makeText(
+                            requireContext(),
+                            "Failed to save expense: ${event.error}",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+
+                    is IncomeEvent.IncomeLoaded -> {
+
+                    }
                 }
-            }.onFailure { exception ->
-                Toast.makeText(
-                    requireContext(),
-                    "Failed to save income: ${exception.localizedMessage}",
-                    Toast.LENGTH_SHORT
-                ).show()
             }
         }
     }
 
     private fun observeViewModelExpense() {
-        expenseViewModel.expenseCategories.observe(viewLifecycleOwner) {
-        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            expenseViewModel.expenseEvent.collectLatest { event ->
+                when (event) {
+                    is ExpenseEvent.Success -> {
+                        if (editId == null) {
+                            clearInputFields(
+                                binding.expenseLayout.amountLayout.etAmount,
+                                binding.expenseLayout.autoCompleteTextView,
+                                binding.expenseLayout.accountCategory,
+                                binding.expenseLayout.noteLayout.etNote
+                            )
+                            Toast.makeText(requireContext(), event.message, Toast.LENGTH_SHORT)
+                                .show()
+                        } else {
+                            Toast.makeText(requireContext(), event.message, Toast.LENGTH_SHORT)
+                                .show()
+                        }
+                        val navController = Navigation.findNavController(requireActivity(), R.id.fragment_container_view)
+                        val action = AddBudgetFragmentDirections.actionAddBudgetToHomeFragment()
+                        navController.navigate(action)
+                    }
 
-        expenseViewModel.accountTypes.observe(viewLifecycleOwner) {
-        }
+                    is ExpenseEvent.Failure -> {
+                        Toast.makeText(
+                            requireContext(),
+                            "Failed to save expense: ${event.error}",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
 
-        expenseViewModel.expenseInsertState.observe(viewLifecycleOwner) { result ->
-            result.onSuccess {
-                if (editId == null) {
-                    clearInputFields(
-                        binding.expenseLayout.amountLayout.etAmount,
-                        binding.expenseLayout.autoCompleteTextView,
-                        binding.expenseLayout.accountCategory,
-                        binding.expenseLayout.noteLayout.etNote
-                    )
-                    Toast.makeText(
-                        requireContext(),
-                        "Expense saved successfully!",
-                        Toast.LENGTH_SHORT
-                    )
-                        .show()
+                    is ExpenseEvent.ExpenseLoaded -> {
+
+                    }
                 }
-            }.onFailure { exception ->
-                Toast.makeText(
-                    requireContext(),
-                    "Failed to save expense: ${exception.localizedMessage}",
-                    Toast.LENGTH_SHORT
-                ).show()
             }
         }
     }
+
 
     private fun populateIncomeFields(income: Income) {
         binding.incomeLayout.amountLayout.etAmount.setText(income.amount.toString())

@@ -7,7 +7,8 @@ import com.example.budgetwise.dao.ExpenseDao
 import com.example.budgetwise.data.local.model.AccountType
 import com.example.budgetwise.data.local.model.Expense
 import com.example.budgetwise.data.local.model.ExpenseCategory
-import com.example.budgetwise.data.local.model.Income
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class ExpenseRepository @Inject constructor(
@@ -16,30 +17,40 @@ class ExpenseRepository @Inject constructor(
     private val accountTypeDao: AccountTypeDao
 ) {
 
-    suspend fun insertExpense(expense: Expense): Result<Unit> {
-        return try {
+    suspend fun insertExpense(expense: Expense) {
+        withContext(Dispatchers.IO) {
             expenseDao.insertExpenses(expense)
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Result.failure(e)
         }
     }
 
-    suspend fun insertExpenseCategories(expenseCategories: List<ExpenseCategory>): Result<Unit> {
-        return try {
+    suspend fun updateExpense(
+        id: Int,
+        amount: Double?,
+        date: Long,
+        categoryId: Int,
+        accountId: Int,
+        note: String
+    ) {
+        withContext(Dispatchers.IO) {
+            expenseDao.updateExpense(id, amount, date, categoryId, accountId, note)
+        }
+    }
+
+    suspend fun deleteExpense(expense: Expense) {
+        withContext(Dispatchers.IO) {
+            expenseDao.deleteExpense(expense)
+        }
+    }
+
+    suspend fun insertExpenseCategories(expenseCategories: List<ExpenseCategory>) {
+        withContext(Dispatchers.IO) {
             expenseCategoryDao.insertExpenseCategories(expenseCategories)
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Result.failure(e)
         }
     }
 
-    suspend fun insertAccountTypes(accountTypes: List<AccountType>): Result<Unit> {
-        return try {
+    suspend fun insertAccountTypes(accountTypes: List<AccountType>) {
+        withContext(Dispatchers.IO) {
             accountTypeDao.insertAccountTypes(accountTypes)
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Result.failure(e)
         }
     }
 
@@ -53,21 +64,6 @@ class ExpenseRepository @Inject constructor(
 
     fun getAllAccountTypes(): LiveData<List<AccountType>> {
         return accountTypeDao.getAllAccountTypes()
-    }
-
-    suspend fun deleteExpense(expense: Expense) {
-        expenseDao.deleteExpense(expense)
-    }
-
-    suspend fun updateExpense(
-        id: Int,
-        amount: Double?,
-        date: Long,
-        categoryId: Int,
-        accountId: Int,
-        note: String
-    ) {
-        expenseDao.updateExpense(id, amount, date, categoryId, accountId, note)
     }
 
     suspend fun getExpenseById(expenseId: Int): Expense? {

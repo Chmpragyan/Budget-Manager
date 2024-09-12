@@ -20,6 +20,7 @@ import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
 import com.github.mikephil.charting.formatter.PercentFormatter
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.map
 
 @AndroidEntryPoint
 class StatsFragment : Fragment(), View.OnClickListener {
@@ -52,14 +53,14 @@ class StatsFragment : Fragment(), View.OnClickListener {
     }
 
     private fun setupObservers() {
-        incomeViewModel.income?.observe(viewLifecycleOwner) {
+        incomeViewModel.income.observe(viewLifecycleOwner) {
             updateIncomePieChart()
         }
         incomeViewModel.incomeCategories.observe(viewLifecycleOwner) {
             updateIncomePieChart()
         }
 
-        expenseViewModel.expense.observe(viewLifecycleOwner) {
+        expenseViewModel.expenses.observe(viewLifecycleOwner) {
             updateExpensePieChart()
         }
         expenseViewModel.expenseCategories.observe(viewLifecycleOwner) {

@@ -1,92 +1,43 @@
 package com.example.budgetwise.presentation.viewmodel
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.budgetwise.data.local.model.AccountType
 import com.example.budgetwise.data.local.model.Expense
 import com.example.budgetwise.data.local.model.ExpenseCategory
-import com.example.budgetwise.data.local.model.Income
 import com.example.budgetwise.data.local.repository.ExpenseRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class ExpenseViewModel @Inject constructor(private val expenseRepository: ExpenseRepository) :
     ViewModel() {
-    private val _expenseInsertState = MutableLiveData<Result<Unit>>()
-    val expenseInsertState: LiveData<Result<Unit>> = _expenseInsertState
+    private val _expenseInsertState = MutableStateFlow<Result<Unit>?>(null)
+    val expenseInsertState: StateFlow<Result<Unit>?> = _expenseInsertState.asStateFlow()
 
-    val expense: LiveData<List<Expense>> = expenseRepository.getAllExpense()
+    val expenses: LiveData<List<Expense>> = expenseRepository.getAllExpense()
 
     val expenseCategories: LiveData<List<ExpenseCategory>> =
         expenseRepository.getAllExpenseCategories()
 
-    val accountTypes: LiveData<List<AccountType>> = expenseRepository.getAllAccountTypes()
+    private val _expenseEvent = MutableSharedFlow<ExpenseEvent>()
+    val expenseEvent: SharedFlow<ExpenseEvent> = _expenseEvent
 
-    fun insertExpense(amount: Double?, date: Long, categoryId: Int, accountId: Int, note: String?) {
+    fun insertExpense(expense: Expense) {
         viewModelScope.launch {
             try {
-                if (amount != null && note != null) {
-                    val expense = Expense(
-                        date = date,
-                        amount = amount,
-                        expCategoryId = categoryId,
-                        accountId = accountId,
-                        note = note
-                    )
-                    expenseRepository.insertExpense(expense)
-                    _expenseInsertState.postValue(Result.success(Unit))
-                } else {
-                    _expenseInsertState.postValue(Result.failure(IllegalArgumentException("Invalid input data")))
-                }
+                expenseRepository.insertExpense(expense)
+                _expenseEvent.emit(ExpenseEvent.Success("Expense added successfully"))
             } catch (e: Exception) {
-                _expenseInsertState.postValue(Result.failure(e))
-            }
-        }
-    }
-
-    fun insertExpenseCategories(expenseCategories: List<ExpenseCategory>) {
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                expenseRepository.insertExpenseCategories(expenseCategories)
-            } catch (_: Exception) {
-
-            }
-        }
-    }
-
-    fun insertAccountTypes(accountTypes: List<AccountType>) {
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                expenseRepository.insertAccountTypes(accountTypes)
-            } catch (_: Exception) {
-
-            }
-        }
-    }
-
-    fun getExpenseByCategory(): Map<String, Double> {
-        val categories = expenseCategories.value.orEmpty()
-        val expenseList = expense.value.orEmpty()
-
-        // Aggregate expense amounts by category
-        return expenseList.groupBy { expenseItem ->
-            categories.find { it.id == expenseItem.expCategoryId }?.name ?: "Unknown"
-        }.mapValues { (_, expenses) ->
-            expenses.sumOf { it.amount }
-        }
-    }
-
-    fun deleteExpense(expense: Expense) {
-        viewModelScope.launch {
-            try {
-                expenseRepository.deleteExpense(expense)
-            } catch (_: Exception) {
-
+                _expenseEvent.emit(ExpenseEvent.Failure("Failed to add expense: ${e.message}"))
             }
         }
     }
@@ -102,16 +53,73 @@ class ExpenseViewModel @Inject constructor(private val expenseRepository: Expens
         viewModelScope.launch {
             try {
                 expenseRepository.updateExpense(id, amount, date, categoryId, accountId, note)
-                _expenseInsertState.value = Result.success(Unit)
+                _expenseEvent.emit(ExpenseEvent.Success("Expense updated successfully"))
             } catch (e: Exception) {
-                _expenseInsertState.value = Result.failure(e)
+                _expenseEvent.emit(ExpenseEvent.Failure("Failed to update expense: ${e.message}"))
+            }
+        }
+    }
+
+    fun deleteExpense(expense: Expense) {
+        viewModelScope.launch {
+            try {
+                expenseRepository.deleteExpense(expense)
+                _expenseEvent.emit(ExpenseEvent.Success("Expense deleted successfully"))
+            } catch (e: Exception) {
+                _expenseEvent.emit(ExpenseEvent.Failure("Failed to delete expense: ${e.message}"))
+            }
+        }
+    }
+
+    fun insertExpenseCategories(expenseCategories: List<ExpenseCategory>) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                expenseRepository.insertExpenseCategories(expenseCategories)
+            } catch (e: Exception) {
+                // error
+            }
+        }
+    }
+
+    fun insertAccountTypes(accountTypes: List<AccountType>) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                expenseRepository.insertAccountTypes(accountTypes)
+            } catch (e: Exception) {
+                // error
             }
         }
     }
 
     fun getExpenseById(expenseId: Int) {
         viewModelScope.launch {
-            expenseRepository.getExpenseById(expenseId)
+            try {
+                val expense = expenseRepository.getExpenseById(expenseId)
+                if (expense != null) {
+                    _expenseEvent.emit(ExpenseEvent.ExpenseLoaded(expense))
+                } else {
+                    _expenseEvent.emit(ExpenseEvent.Failure("Expense not found"))
+                }
+            } catch (e: Exception) {
+                _expenseEvent.emit(ExpenseEvent.Failure("Failed to load expense: ${e.message}"))
+            }
         }
     }
+
+    fun getExpenseByCategory(): Map<String, Double> {
+        val categories = expenseCategories.value.orEmpty()
+        val expenseList = expenses.value.orEmpty()
+
+        return expenseList.groupBy { expenseItem ->
+            categories.find { it.id == expenseItem.expCategoryId }?.name ?: "Unknown"
+        }.mapValues { (_, expenses) ->
+            expenses.sumOf { it.amount }
+        }
+    }
+}
+
+sealed class ExpenseEvent {
+    data class Success(val message: String) : ExpenseEvent()
+    data class Failure(val error: String) : ExpenseEvent()
+    data class ExpenseLoaded(val expense: Expense) : ExpenseEvent()
 }

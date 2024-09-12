@@ -11,10 +11,10 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -26,12 +26,12 @@ import com.example.budgetwise.data.local.model.ExpenseCategory
 import com.example.budgetwise.data.local.model.Income
 import com.example.budgetwise.data.local.model.IncomeCategory
 import com.example.budgetwise.databinding.FragmentHomeBinding
-import com.example.budgetwise.extensions.formatDate
 import com.example.budgetwise.interfaces.ISelectList
 import com.example.budgetwise.presentation.adapter.BudgetAdapter
 import com.example.budgetwise.presentation.viewmodel.ExpenseViewModel
 import com.example.budgetwise.presentation.viewmodel.IncomeViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 private const val TAG = "HomeFragment"
 
@@ -88,25 +88,29 @@ class HomeFragment : Fragment(), View.OnClickListener, ISelectList {
 
         setRecyclerView()
 
-        incomeViewModel.income.observe(viewLifecycleOwner) { list ->
-            list?.let {
-                Log.d(TAG, "Income data received: $it")
-                incomeList.clear()
-                incomeList.addAll(it)
-                budgetAdapter.notifyDataSetChanged()
-                updateBudgetTotals()
-                swipeToDelUpdateFeatures()
+        viewLifecycleOwner.lifecycleScope.launch {
+            incomeViewModel.income.observe(viewLifecycleOwner) { list ->
+                list?.let {
+                    Log.d(TAG, "Income data received: $it")
+                    incomeList.clear()
+                    incomeList.addAll(it)
+                    budgetAdapter.notifyDataSetChanged()
+                    updateBudgetTotals()
+                    swipeToDelUpdateFeatures()
+                }
             }
         }
 
-        expenseViewModel.expense.observe(viewLifecycleOwner) { list ->
-            list?.let {
-                Log.d(TAG, "Expense data received: $it")
-                expenseList.clear()
-                expenseList.addAll(it)
-                budgetAdapter.notifyDataSetChanged()
-                updateBudgetTotals()
-                swipeToDelUpdateFeatures()
+        viewLifecycleOwner.lifecycleScope.launch {
+            expenseViewModel.expenses.observeForever { list ->
+                list.let {
+                    Log.d(TAG, "Expense data received: $it")
+                    expenseList.clear()
+                    expenseList.addAll(it)
+                    budgetAdapter.notifyDataSetChanged()
+                    updateBudgetTotals()
+                    swipeToDelUpdateFeatures()
+                }
             }
         }
     }

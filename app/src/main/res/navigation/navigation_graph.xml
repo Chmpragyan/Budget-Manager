@@ -40,12 +40,12 @@
         <argument
             android:name="income"
             app:argType="com.example.budgetwise.data.local.model.Income"
-            app:nullable="true"/>
+            app:nullable="true" />
 
         <argument
             android:name="expense"
             app:argType="com.example.budgetwise.data.local.model.Expense"
-            app:nullable="true"/>
+            app:nullable="true" />
         <action
             android:id="@+id/action_add_budget_to_home_fragment"
             app:destination="@id/home_fragment" />
